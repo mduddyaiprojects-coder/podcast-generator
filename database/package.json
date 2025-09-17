@@ -1,0 +1,22 @@
+{
+  "name": "podcast-generator-database",
+  "version": "1.0.0",
+  "description": "Database scripts for Podcast Generator",
+  "main": "index.js",
+  "scripts": {
+    "migrate": "node scripts/migrate.js",
+    "seed": "node scripts/seed.js",
+    "reset": "node scripts/reset.js",
+    "setup": "npm run reset && npm run migrate && npm run seed",
+    "test": "NODE_ENV=test npm run migrate && NODE_ENV=test npm run seed"
+  },
+  "dependencies": {
+    "pg": "^8.11.3"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.10.9"
+  },
+  "keywords": ["database", "postgresql", "migrations", "seeds"],
+  "author": "Podcast Generator Team",
+  "license": "MIT"
+}
