@@ -41,13 +41,14 @@
 - Paths shown below assume web application structure
 
 ## Phase 3.1: Setup
-- [ ] T001 Create project structure per implementation plan
-- [ ] T002 Initialize Node.js project with Azure Functions dependencies
-- [ ] T003 [P] Configure TypeScript and ESLint for Azure Functions
-- [ ] T004 [P] Set up Azure Functions local development environment
-- [ ] T005 [P] Configure n8n workflow environment and credentials
-- [ ] T006 [P] Set up PostgreSQL database schema and migrations
-- [ ] T007 [P] Configure Azure Blob Storage and CDN
+- [x] T001 Create project structure per implementation plan
+- [x] T002 Initialize Node.js project with Azure Functions dependencies
+- [ ] T002-FIX Fix Jest configuration - correct moduleNameMapping property name
+- [x] T003 [P] Configure TypeScript and ESLint for Azure Functions
+- [x] T004 [P] Set up Azure Functions local development environment
+- [x] T005 [P] Configure n8n workflow environment and credentials
+- [x] T006 [P] Set up PostgreSQL database schema and migrations
+- [x] T007 [P] Configure Azure Blob Storage and CDN
 - [ ] T008 [P] Set up iOS Share Sheet extension project structure
 
 ## Phase 3.2: Tests First (TDD) ⚠️ MUST COMPLETE BEFORE 3.3
