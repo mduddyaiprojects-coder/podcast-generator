@@ -13,23 +13,39 @@ n8n workflows handle the automated processing of content submissions, including:
 
 ## Quick Start
 
-1. **Run the setup script:**
+### For Azure-hosted n8n (Recommended):
+
+1. **Run the Azure setup script:**
+   ```bash
+   ./azure-setup.sh
+   ```
+
+2. **Configure your credentials:**
+   - Edit `.env` file with your Azure n8n host and API keys
+   - Update credential files in `credentials/` directory
+
+3. **Import workflows to your Azure n8n:**
+   - Use the workflow files in `workflows/` directory
+   - Import them into your Azure n8n instance
+
+4. **Access your Azure n8n:**
+   - Open https://your-azure-n8n-host.azurewebsites.net
+   - Use your existing Azure n8n credentials
+
+### For local development:
+
+1. **Run the local setup script:**
    ```bash
    ./setup.sh
    ```
 
-2. **Configure your credentials:**
-   - Edit `.env` file with your actual API keys and endpoints
-   - Update credential files in `credentials/` directory
-
-3. **Start n8n:**
+2. **Start local n8n:**
    ```bash
    npm run dev
    ```
 
-4. **Access n8n interface:**
+3. **Access local n8n:**
    - Open http://localhost:5678 in your browser
-   - Default credentials: admin/admin (change in .env)
 
 ## Directory Structure
 
