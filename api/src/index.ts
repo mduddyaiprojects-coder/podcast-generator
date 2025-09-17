@@ -2,6 +2,7 @@ import { app } from '@azure/functions';
 import { contentSubmissionFunction } from './functions/content-submission';
 import { rssFeedFunction } from './functions/rss-feed';
 import { healthCheckFunction } from './functions/health-check';
+import storageManagementFunction from './functions/storage-management';
 
 // Register Azure Functions
 app.http('contentSubmission', {
@@ -23,6 +24,13 @@ app.http('healthCheck', {
   authLevel: 'anonymous',
   route: 'health',
   handler: healthCheckFunction
+});
+
+app.http('storageManagement', {
+  methods: ['GET', 'POST', 'DELETE'],
+  authLevel: 'function',
+  route: 'storage',
+  handler: storageManagementFunction
 });
 
 export default app;
