@@ -1,0 +1,310 @@
+openapi: 3.0.3
+info:
+  title: Podcast Generator API
+  description: API for submitting content and generating podcast episodes
+  version: 1.0.0
+  contact:
+    name: Podcast Generator
+    email: support@podcastgenerator.com
+
+servers:
+  - url: https://podcast-generator.azurewebsites.net/api
+    description: Production server
+  - url: https://localhost:7071/api
+    description: Local development server
+
+paths:
+  /content:
+    post:
+      summary: Submit content for podcast generation
+      description: Submit a URL, YouTube video, or document for conversion to a podcast episode
+      operationId: submitContent
+      tags:
+        - Content
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentSubmissionRequest'
+            examples:
+              url_example:
+                summary: Web article submission
+                value:
+                  content_url: "https://example.com/article"
+                  content_type: "url"
+                  user_note: "Interesting tech article"
+              youtube_example:
+                summary: YouTube video submission
+                value:
+                  content_url: "https://www.youtube.com/watch?v=example"
+                  content_type: "youtube"
+                  user_note: "Great tutorial video"
+              document_example:
+                summary: PDF document submission
+                value:
+                  content_url: "https://example.com/document.pdf"
+                  content_type: "pdf"
+                  user_note: "Research paper"
+      responses:
+        '202':
+          description: Content submitted successfully, processing started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentSubmissionResponse'
+              examples:
+                success_example:
+                  summary: Successful submission
+                  value:
+                    submission_id: "123e4567-e89b-12d3-a456-426614174000"
+                    status: "pending"
+                    estimated_completion: "2024-12-19T15:30:00Z"
+                    message: "Content submitted for processing"
+        '400':
+          description: Bad request - invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalid_url:
+                  summary: Invalid URL
+                  value:
+                    error: "INVALID_URL"
+                    message: "The provided URL is not valid"
+                    details: "content_url must be a valid URL"
+                invalid_content_type:
+                  summary: Invalid content type
+                  value:
+                    error: "INVALID_CONTENT_TYPE"
+                    message: "Unsupported content type"
+                    details: "content_type must be one of: url, youtube, pdf, document"
+        '429':
+          description: Too many requests - rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                rate_limit:
+                  summary: Rate limit exceeded
+                  value:
+                    error: "RATE_LIMIT_EXCEEDED"
+                    message: "Too many requests"
+                    details: "Maximum 10 concurrent processing jobs allowed"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                server_error:
+                  summary: Server error
+                  value:
+                    error: "INTERNAL_ERROR"
+                    message: "An internal error occurred"
+                    details: "Please try again later"
+
+  /content/{submission_id}/status:
+    get:
+      summary: Get processing status
+      description: Check the processing status of a submitted content item
+      operationId: getProcessingStatus
+      tags:
+        - Content
+      parameters:
+        - name: submission_id
+          in: path
+          required: true
+          description: Unique identifier for the content submission
+          schema:
+            type: string
+            format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        '200':
+          description: Processing status retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcessingStatusResponse'
+              examples:
+                pending:
+                  summary: Processing pending
+                  value:
+                    submission_id: "123e4567-e89b-12d3-a456-426614174000"
+                    status: "pending"
+                    progress: 0
+                    current_step: "queued"
+                    estimated_completion: "2024-12-19T15:30:00Z"
+                processing:
+                  summary: Currently processing
+                  value:
+                    submission_id: "123e4567-e89b-12d3-a456-426614174000"
+                    status: "processing"
+                    progress: 45
+                    current_step: "generating_dialogue"
+                    estimated_completion: "2024-12-19T15:20:00Z"
+                completed:
+                  summary: Processing completed
+                  value:
+                    submission_id: "123e4567-e89b-12d3-a456-426614174000"
+                    status: "completed"
+                    progress: 100
+                    current_step: "completed"
+                    episode_id: "456e7890-e89b-12d3-a456-426614174001"
+                    rss_feed_url: "https://podcast-generator.azurewebsites.net/api/feeds/abc123/rss.xml"
+                failed:
+                  summary: Processing failed
+                  value:
+                    submission_id: "123e4567-e89b-12d3-a456-426614174000"
+                    status: "failed"
+                    progress: 0
+                    current_step: "content_extraction"
+                    error_message: "Unable to extract content from the provided URL"
+        '404':
+          description: Submission not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                not_found:
+                  summary: Submission not found
+                  value:
+                    error: "SUBMISSION_NOT_FOUND"
+                    message: "The specified submission was not found"
+                    details: "submission_id does not exist"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    ContentSubmissionRequest:
+      type: object
+      required:
+        - content_url
+        - content_type
+      properties:
+        content_url:
+          type: string
+          format: uri
+          description: URL or file path to the content to be processed
+          example: "https://example.com/article"
+        content_type:
+          type: string
+          enum: [url, youtube, pdf, document]
+          description: Type of content being submitted
+          example: "url"
+        user_note:
+          type: string
+          maxLength: 500
+          description: Optional user-provided note about the content
+          example: "Interesting tech article about AI"
+      additionalProperties: false
+
+    ContentSubmissionResponse:
+      type: object
+      required:
+        - submission_id
+        - status
+        - message
+      properties:
+        submission_id:
+          type: string
+          format: uuid
+          description: Unique identifier for the submission
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        status:
+          type: string
+          enum: [pending, processing, completed, failed]
+          description: Current processing status
+          example: "pending"
+        estimated_completion:
+          type: string
+          format: date-time
+          description: Estimated completion time
+          example: "2024-12-19T15:30:00Z"
+        message:
+          type: string
+          description: Human-readable status message
+          example: "Content submitted for processing"
+      additionalProperties: false
+
+    ProcessingStatusResponse:
+      type: object
+      required:
+        - submission_id
+        - status
+        - progress
+      properties:
+        submission_id:
+          type: string
+          format: uuid
+          description: Unique identifier for the submission
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        status:
+          type: string
+          enum: [pending, processing, completed, failed]
+          description: Current processing status
+          example: "processing"
+        progress:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: Processing progress percentage
+          example: 45
+        current_step:
+          type: string
+          description: Current processing step
+          example: "generating_dialogue"
+        estimated_completion:
+          type: string
+          format: date-time
+          description: Estimated completion time
+          example: "2024-12-19T15:20:00Z"
+        episode_id:
+          type: string
+          format: uuid
+          description: Episode ID (only present when completed)
+          example: "456e7890-e89b-12d3-a456-426614174001"
+        rss_feed_url:
+          type: string
+          format: uri
+          description: RSS feed URL (only present when completed)
+          example: "https://podcast-generator.azurewebsites.net/api/feeds/abc123/rss.xml"
+        error_message:
+          type: string
+          description: Error message (only present when failed)
+          example: "Unable to extract content from the provided URL"
+      additionalProperties: false
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error code
+          example: "INVALID_URL"
+        message:
+          type: string
+          description: Human-readable error message
+          example: "The provided URL is not valid"
+        details:
+          type: string
+          description: Additional error details
+          example: "content_url must be a valid URL"
+      additionalProperties: false
+
+tags:
+  - name: Content
+    description: Content submission and processing operations

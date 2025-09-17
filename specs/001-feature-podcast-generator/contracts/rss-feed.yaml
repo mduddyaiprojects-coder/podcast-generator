@@ -1,0 +1,432 @@
+openapi: 3.0.3
+info:
+  title: Podcast Generator RSS API
+  description: API for accessing RSS feeds and podcast episodes
+  version: 1.0.0
+  contact:
+    name: Podcast Generator
+    email: support@podcastgenerator.com
+
+servers:
+  - url: https://podcast-generator.azurewebsites.net/api
+    description: Production server
+  - url: https://localhost:7071/api
+    description: Local development server
+
+paths:
+  /feeds/{feed_slug}/rss.xml:
+    get:
+      summary: Get RSS feed
+      description: Retrieve the RSS feed for a specific podcast feed
+      operationId: getRSSFeed
+      tags:
+        - RSS
+      parameters:
+        - name: feed_slug
+          in: path
+          required: true
+          description: Unique slug identifier for the feed
+          schema:
+            type: string
+            pattern: '^[a-zA-Z0-9-_]+$'
+          example: "abc123"
+      responses:
+        '200':
+          description: RSS feed retrieved successfully
+          content:
+            application/rss+xml:
+              schema:
+                type: string
+                format: binary
+              examples:
+                rss_feed:
+                  summary: RSS 2.0 feed with iTunes extensions
+                  value: |
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
+                      <channel>
+                        <title>My Tech Podcast</title>
+                        <description>AI-generated podcast summaries of tech content</description>
+                        <link>https://podcast-generator.azurewebsites.net</link>
+                        <language>en-US</language>
+                        <copyright>© 2024 Podcast Generator</copyright>
+                        <itunes:author>Podcast Generator</itunes:author>
+                        <itunes:summary>AI-generated podcast summaries of tech content</itunes:summary>
+                        <itunes:owner>
+                          <itunes:name>Podcast Generator</itunes:name>
+                          <itunes:email>admin@example.com</itunes:email>
+                        </itunes:owner>
+                        <itunes:explicit>no</itunes:explicit>
+                        <itunes:category text="Technology"/>
+                        <itunes:type>episodic</itunes:type>
+                        <item>
+                          <title>AI Revolution in Healthcare</title>
+                          <description>Exploring the latest developments in AI healthcare applications</description>
+                          <guid isPermaLink="false">456e7890-e89b-12d3-a456-426614174001</guid>
+                          <pubDate>Mon, 19 Dec 2024 15:30:00 GMT</pubDate>
+                          <enclosure url="https://cdn.podcast-generator.azurewebsites.net/audio/episode-001.mp3" type="audio/mpeg" length="15728640"/>
+                          <itunes:duration>00:12:34</itunes:duration>
+                          <itunes:explicit>no</itunes:explicit>
+                          <itunes:episodeType>full</itunes:episodeType>
+                        </item>
+                      </channel>
+                    </rss>
+        '404':
+          description: Feed not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                feed_not_found:
+                  summary: Feed not found
+                  value:
+                    error: "FEED_NOT_FOUND"
+                    message: "The specified feed was not found"
+                    details: "feed_slug does not exist"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /feeds/{feed_slug}/episodes:
+    get:
+      summary: List episodes
+      description: Get a list of episodes in a feed
+      operationId: listEpisodes
+      tags:
+        - RSS
+      parameters:
+        - name: feed_slug
+          in: path
+          required: true
+          description: Unique slug identifier for the feed
+          schema:
+            type: string
+            pattern: '^[a-zA-Z0-9-_]+$'
+          example: "abc123"
+        - name: limit
+          in: query
+          required: false
+          description: Maximum number of episodes to return
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+          example: 20
+        - name: offset
+          in: query
+          required: false
+          description: Number of episodes to skip
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          example: 0
+      responses:
+        '200':
+          description: Episodes retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EpisodesListResponse'
+              examples:
+                episodes_list:
+                  summary: List of episodes
+                  value:
+                    feed_slug: "abc123"
+                    total_count: 5
+                    episodes:
+                      - episode_id: "456e7890-e89b-12d3-a456-426614174001"
+                        title: "AI Revolution in Healthcare"
+                        description: "Exploring the latest developments in AI healthcare applications"
+                        audio_url: "https://cdn.podcast-generator.azurewebsites.net/audio/episode-001.mp3"
+                        duration: 754
+                        size: 15728640
+                        pub_date: "2024-12-19T15:30:00Z"
+                        source_url: "https://example.com/healthcare-ai-article"
+                      - episode_id: "789e0123-e89b-12d3-a456-426614174002"
+                        title: "The Future of Web Development"
+                        description: "Discussing modern web development trends and technologies"
+                        audio_url: "https://cdn.podcast-generator.azurewebsites.net/audio/episode-002.mp3"
+                        duration: 892
+                        size: 18677760
+                        pub_date: "2024-12-18T14:20:00Z"
+                        source_url: "https://example.com/web-dev-trends"
+        '404':
+          description: Feed not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /feeds/{feed_slug}/episodes/{episode_id}:
+    get:
+      summary: Get episode details
+      description: Get detailed information about a specific episode
+      operationId: getEpisode
+      tags:
+        - RSS
+      parameters:
+        - name: feed_slug
+          in: path
+          required: true
+          description: Unique slug identifier for the feed
+          schema:
+            type: string
+            pattern: '^[a-zA-Z0-9-_]+$'
+          example: "abc123"
+        - name: episode_id
+          in: path
+          required: true
+          description: Unique identifier for the episode
+          schema:
+            type: string
+            format: uuid
+          example: "456e7890-e89b-12d3-a456-426614174001"
+      responses:
+        '200':
+          description: Episode details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EpisodeDetailsResponse'
+              examples:
+                episode_details:
+                  summary: Episode details
+                  value:
+                    episode_id: "456e7890-e89b-12d3-a456-426614174001"
+                    feed_slug: "abc123"
+                    title: "AI Revolution in Healthcare"
+                    description: "Exploring the latest developments in AI healthcare applications"
+                    audio_url: "https://cdn.podcast-generator.azurewebsites.net/audio/episode-001.mp3"
+                    duration: 754
+                    size: 15728640
+                    pub_date: "2024-12-19T15:30:00Z"
+                    source_url: "https://example.com/healthcare-ai-article"
+                    content_type: "url"
+                    transcript: "Welcome to today's episode where we discuss..."
+                    dialogue_script: "Alex: Welcome to the show, Sam. Today we're talking about..."
+                    summary: "This episode covers the latest developments in AI healthcare applications..."
+                    chapter_markers:
+                      - title: "Introduction"
+                        start_time: 0
+                        end_time: 60
+                      - title: "Main Discussion"
+                        start_time: 60
+                        end_time: 600
+                      - title: "Conclusion"
+                        start_time: 600
+                        end_time: 754
+        '404':
+          description: Episode or feed not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    EpisodesListResponse:
+      type: object
+      required:
+        - feed_slug
+        - total_count
+        - episodes
+      properties:
+        feed_slug:
+          type: string
+          description: Feed slug identifier
+          example: "abc123"
+        total_count:
+          type: integer
+          description: Total number of episodes in the feed
+          example: 5
+        episodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/EpisodeSummary'
+      additionalProperties: false
+
+    EpisodeSummary:
+      type: object
+      required:
+        - episode_id
+        - title
+        - description
+        - audio_url
+        - duration
+        - pub_date
+      properties:
+        episode_id:
+          type: string
+          format: uuid
+          description: Unique identifier for the episode
+          example: "456e7890-e89b-12d3-a456-426614174001"
+        title:
+          type: string
+          description: Episode title
+          example: "AI Revolution in Healthcare"
+        description:
+          type: string
+          description: Episode description
+          example: "Exploring the latest developments in AI healthcare applications"
+        audio_url:
+          type: string
+          format: uri
+          description: URL to the audio file
+          example: "https://cdn.podcast-generator.azurewebsites.net/audio/episode-001.mp3"
+        duration:
+          type: integer
+          description: Duration in seconds
+          example: 754
+        size:
+          type: integer
+          description: File size in bytes
+          example: 15728640
+        pub_date:
+          type: string
+          format: date-time
+          description: Publication date
+          example: "2024-12-19T15:30:00Z"
+        source_url:
+          type: string
+          format: uri
+          description: Original content URL
+          example: "https://example.com/healthcare-ai-article"
+      additionalProperties: false
+
+    EpisodeDetailsResponse:
+      type: object
+      required:
+        - episode_id
+        - feed_slug
+        - title
+        - description
+        - audio_url
+        - duration
+        - pub_date
+      properties:
+        episode_id:
+          type: string
+          format: uuid
+          description: Unique identifier for the episode
+          example: "456e7890-e89b-12d3-a456-426614174001"
+        feed_slug:
+          type: string
+          description: Feed slug identifier
+          example: "abc123"
+        title:
+          type: string
+          description: Episode title
+          example: "AI Revolution in Healthcare"
+        description:
+          type: string
+          description: Episode description
+          example: "Exploring the latest developments in AI healthcare applications"
+        audio_url:
+          type: string
+          format: uri
+          description: URL to the audio file
+          example: "https://cdn.podcast-generator.azurewebsites.net/audio/episode-001.mp3"
+        duration:
+          type: integer
+          description: Duration in seconds
+          example: 754
+        size:
+          type: integer
+          description: File size in bytes
+          example: 15728640
+        pub_date:
+          type: string
+          format: date-time
+          description: Publication date
+          example: "2024-12-19T15:30:00Z"
+        source_url:
+          type: string
+          format: uri
+          description: Original content URL
+          example: "https://example.com/healthcare-ai-article"
+        content_type:
+          type: string
+          enum: [url, youtube, pdf, document]
+          description: Type of source content
+          example: "url"
+        transcript:
+          type: string
+          description: Full transcript text
+          example: "Welcome to today's episode where we discuss..."
+        dialogue_script:
+          type: string
+          description: Generated dialogue script
+          example: "Alex: Welcome to the show, Sam. Today we're talking about..."
+        summary:
+          type: string
+          description: Content summary
+          example: "This episode covers the latest developments in AI healthcare applications..."
+        chapter_markers:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChapterMarker'
+          description: Chapter markers for navigation
+      additionalProperties: false
+
+    ChapterMarker:
+      type: object
+      required:
+        - title
+        - start_time
+        - end_time
+      properties:
+        title:
+          type: string
+          description: Chapter title
+          example: "Introduction"
+        start_time:
+          type: number
+          description: Start time in seconds
+          example: 0
+        end_time:
+          type: number
+          description: End time in seconds
+          example: 60
+      additionalProperties: false
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error code
+          example: "FEED_NOT_FOUND"
+        message:
+          type: string
+          description: Human-readable error message
+          example: "The specified feed was not found"
+        details:
+          type: string
+          description: Additional error details
+          example: "feed_slug does not exist"
+      additionalProperties: false
+
+tags:
+  - name: RSS
+    description: RSS feed and episode operations

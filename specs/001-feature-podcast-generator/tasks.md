@@ -1,0 +1,243 @@
+# Tasks: Podcast Generator
+
+**Input**: Design documents from `/specs/001-feature-podcast-generator/`
+**Prerequisites**: plan.md (required), research.md, data-model.md, contracts/
+
+## Execution Flow (main)
+```
+1. Load plan.md from feature directory
+   → If not found: ERROR "No implementation plan found"
+   → Extract: tech stack, libraries, structure
+2. Load optional design documents:
+   → data-model.md: Extract entities → model tasks
+   → contracts/: Each file → contract test task
+   → research.md: Extract decisions → setup tasks
+3. Generate tasks by category:
+   → Setup: project init, dependencies, linting
+   → Tests: contract tests, integration tests
+   → Core: models, services, CLI commands
+   → Integration: DB, middleware, logging
+   → Polish: unit tests, performance, docs
+4. Apply task rules:
+   → Different files = mark [P] for parallel
+   → Same file = sequential (no [P])
+   → Tests before implementation (TDD)
+5. Number tasks sequentially (T001, T002...)
+6. Generate dependency graph
+7. Create parallel execution examples
+8. Validate task completeness:
+   → All contracts have tests?
+   → All entities have models?
+   → All endpoints implemented?
+9. Return: SUCCESS (tasks ready for execution)
+```
+
+## Format: `[ID] [P?] Description`
+- **[P]**: Can run in parallel (different files, no dependencies)
+- Include exact file paths in descriptions
+
+## Path Conventions
+- **Web app**: `api/src/`, `n8n-workflows/`, `ios/`
+- Paths shown below assume web application structure
+
+## Phase 3.1: Setup
+- [ ] T001 Create project structure per implementation plan
+- [ ] T002 Initialize Node.js project with Azure Functions dependencies
+- [ ] T003 [P] Configure TypeScript and ESLint for Azure Functions
+- [ ] T004 [P] Set up Azure Functions local development environment
+- [ ] T005 [P] Configure n8n workflow environment and credentials
+- [ ] T006 [P] Set up PostgreSQL database schema and migrations
+- [ ] T007 [P] Configure Azure Blob Storage and CDN
+- [ ] T008 [P] Set up iOS Share Sheet extension project structure
+
+## Phase 3.2: Tests First (TDD) ⚠️ MUST COMPLETE BEFORE 3.3
+**CRITICAL: These tests MUST be written and MUST FAIL before ANY implementation**
+
+- [ ] T009 [P] Contract test POST /api/content in tests/contract/test_content_submission.py
+- [ ] T010 [P] Contract test GET /api/content/{id}/status in tests/contract/test_status_check.py
+- [ ] T011 [P] Contract test GET /api/feeds/{slug}/rss.xml in tests/contract/test_rss_feed.py
+- [ ] T012 [P] Contract test GET /api/feeds/{slug}/episodes in tests/contract/test_episodes_list.py
+- [ ] T013 [P] Integration test content submission flow in tests/integration/test_submission_flow.py
+- [ ] T014 [P] Integration test RSS feed generation in tests/integration/test_rss_generation.py
+- [ ] T015 [P] Integration test iOS Share Sheet in tests/integration/test_ios_integration.py
+- [ ] T016 [P] Integration test n8n workflow processing in tests/integration/test_workflow_processing.py
+
+## Phase 3.3: Core Implementation (ONLY after tests are failing)
+- [ ] T017 [P] ContentSubmission model in api/src/models/content-submission.ts
+- [ ] T018 [P] PodcastEpisode model in api/src/models/podcast-episode.ts
+- [ ] T019 [P] UserFeed model in api/src/models/user-feed.ts
+- [ ] T020 [P] ProcessingJob model in api/src/models/processing-job.ts
+- [ ] T021 [P] ContentExtractor service in api/src/services/content-extractor.ts
+- [ ] T022 [P] TTSService in api/src/services/tts-service.ts
+- [ ] T023 [P] RSSGenerator service in api/src/services/rss-generator.ts
+- [ ] T024 [P] StorageService in api/src/services/storage-service.ts
+- [ ] T025 POST /api/content Azure Function in api/src/functions/content-submission/
+- [ ] T026 GET /api/content/{id}/status Azure Function in api/src/functions/status-check/
+- [ ] T027 GET /api/feeds/{slug}/rss.xml Azure Function in api/src/functions/rss-feed/
+- [ ] T028 GET /api/feeds/{slug}/episodes Azure Function in api/src/functions/episodes-list/
+- [ ] T029 Input validation middleware in api/src/utils/validation.ts
+- [ ] T030 Error handling middleware in api/src/utils/error-handler.ts
+
+## Phase 3.4: n8n Workflow Implementation
+- [ ] T031 [P] Content processing workflow in n8n-workflows/content-processing.json
+- [ ] T032 [P] YouTube extraction workflow in n8n-workflows/youtube-extraction.json
+- [ ] T033 [P] Document processing workflow in n8n-workflows/document-processing.json
+- [ ] T034 [P] TTS generation workflow in n8n-workflows/tts-generation.json
+- [ ] T035 [P] Error handling workflow in n8n-workflows/error-handling.json
+- [ ] T036 Configure n8n webhook endpoints and credentials
+- [ ] T037 Set up n8n workflow monitoring and logging
+- [ ] T038 Test n8n workflow execution with sample content
+
+## Phase 3.5: iOS Integration
+- [ ] T039 [P] iOS Share Sheet extension in ios/ShareExtension/ShareViewController.swift
+- [ ] T040 [P] iOS Share Sheet configuration in ios/ShareExtension/Info.plist
+- [ ] T041 [P] iOS Shortcuts integration in ios/Shortcuts/SendToPodcast.shortcut
+- [ ] T042 [P] iOS Share Sheet UI components in ios/ShareExtension/UI/
+- [ ] T043 [P] iOS Share Sheet networking in ios/ShareExtension/Networking/
+- [ ] T044 Configure iOS Share Sheet app groups and entitlements
+- [ ] T045 Test iOS Share Sheet with various content types
+- [ ] T046 Test iOS Shortcuts automation workflows
+
+## Phase 3.6: Database Integration
+- [ ] T047 Connect models to PostgreSQL database
+- [ ] T048 Implement database migrations for all entities
+- [ ] T049 Set up database connection pooling for Azure Functions
+- [ ] T050 Configure database indexes for performance
+- [ ] T051 Implement data retention policies (90-day cleanup)
+- [ ] T052 Set up database monitoring and backup
+- [ ] T053 Test database operations under load
+
+## Phase 3.7: External Service Integration
+- [ ] T054 [P] Firecrawl API integration in api/src/services/firecrawl-service.ts
+- [ ] T055 [P] Azure OpenAI integration in api/src/services/azure-openai-service.ts
+- [ ] T056 [P] ElevenLabs API integration in api/src/services/elevenlabs-service.ts
+- [ ] T057 [P] YouTube API integration in api/src/services/youtube-service.ts
+- [ ] T058 [P] Whisper API integration in api/src/services/whisper-service.ts
+- [ ] T059 Configure API keys and credentials securely
+- [ ] T060 Implement retry logic and error handling for all services
+- [ ] T061 Set up service monitoring and alerting
+
+## Phase 3.8: Storage and CDN
+- [ ] T062 [P] Azure Blob Storage integration in api/src/services/blob-storage-service.ts
+- [ ] T063 [P] Azure CDN configuration for audio file distribution
+- [ ] T064 [P] File upload and download utilities in api/src/utils/file-utils.ts
+- [ ] T065 [P] Audio file processing utilities in api/src/utils/audio-utils.ts
+- [ ] T066 Configure storage lifecycle policies for cost optimization
+- [ ] T067 Set up CDN caching rules and invalidation
+- [ ] T068 Test file upload/download performance
+
+## Phase 3.9: RSS Feed Implementation
+- [ ] T069 [P] RSS XML generation in api/src/services/rss-generator.ts
+- [ ] T070 [P] iTunes namespace compliance in api/src/utils/rss-utils.ts
+- [ ] T071 [P] RSS feed validation in api/src/utils/rss-validator.ts
+- [ ] T072 [P] Episode metadata formatting in api/src/utils/episode-utils.ts
+- [ ] T073 Configure RSS feed caching and performance
+- [ ] T074 Test RSS feed compatibility with podcast apps
+- [ ] T075 Validate RSS feed against iTunes requirements
+
+## Phase 3.10: Polish
+- [ ] T076 [P] Unit tests for all services in tests/unit/
+- [ ] T077 [P] Unit tests for all utilities in tests/unit/
+- [ ] T078 [P] Unit tests for all models in tests/unit/
+- [ ] T079 Performance tests for API endpoints
+- [ ] T080 Performance tests for n8n workflows
+- [ ] T081 Performance tests for iOS Share Sheet
+- [ ] T082 [P] Update API documentation in docs/api.md
+- [ ] T083 [P] Update deployment documentation in docs/deployment.md
+- [ ] T084 [P] Update user guide in docs/user-guide.md
+- [ ] T085 Remove code duplication and refactor
+- [ ] T086 Run manual testing scenarios from quickstart.md
+- [ ] T087 Security audit and penetration testing
+- [ ] T088 Load testing with 10 concurrent users
+- [ ] T089 End-to-end testing with real content
+- [ ] T090 Production deployment and monitoring setup
+
+## Dependencies
+- Tests (T009-T016) before implementation (T017-T030)
+- Models (T017-T020) before services (T021-T024)
+- Services (T021-T024) before Azure Functions (T025-T028)
+- Azure Functions (T025-T028) before n8n workflows (T031-T038)
+- n8n workflows (T031-T038) before iOS integration (T039-T046)
+- Database setup (T047-T053) before external services (T054-T061)
+- External services (T054-T061) before storage (T062-T068)
+- Storage (T062-T068) before RSS feeds (T069-T075)
+- All implementation before polish (T076-T090)
+
+## Parallel Examples
+
+### Launch T009-T016 together (Contract Tests):
+```
+Task: "Contract test POST /api/content in tests/contract/test_content_submission.py"
+Task: "Contract test GET /api/content/{id}/status in tests/contract/test_status_check.py"
+Task: "Contract test GET /api/feeds/{slug}/rss.xml in tests/contract/test_rss_feed.py"
+Task: "Contract test GET /api/feeds/{slug}/episodes in tests/contract/test_episodes_list.py"
+Task: "Integration test content submission flow in tests/integration/test_submission_flow.py"
+Task: "Integration test RSS feed generation in tests/integration/test_rss_generation.py"
+Task: "Integration test iOS Share Sheet in tests/integration/test_ios_integration.py"
+Task: "Integration test n8n workflow processing in tests/integration/test_workflow_processing.py"
+```
+
+### Launch T017-T024 together (Models and Services):
+```
+Task: "ContentSubmission model in api/src/models/content-submission.ts"
+Task: "PodcastEpisode model in api/src/models/podcast-episode.ts"
+Task: "UserFeed model in api/src/models/user-feed.ts"
+Task: "ProcessingJob model in api/src/models/processing-job.ts"
+Task: "ContentExtractor service in api/src/services/content-extractor.ts"
+Task: "TTSService in api/src/services/tts-service.ts"
+Task: "RSSGenerator service in api/src/services/rss-generator.ts"
+Task: "StorageService in api/src/services/storage-service.ts"
+```
+
+### Launch T031-T035 together (n8n Workflows):
+```
+Task: "Content processing workflow in n8n-workflows/content-processing.json"
+Task: "YouTube extraction workflow in n8n-workflows/youtube-extraction.json"
+Task: "Document processing workflow in n8n-workflows/document-processing.json"
+Task: "TTS generation workflow in n8n-workflows/tts-generation.json"
+Task: "Error handling workflow in n8n-workflows/error-handling.json"
+```
+
+## Notes
+- [P] tasks = different files, no dependencies
+- Verify tests fail before implementing
+- Commit after each task
+- Avoid: vague tasks, same file conflicts
+- Follow TDD approach: tests first, then implementation
+- Use Azure Functions best practices
+- Ensure n8n workflows are properly configured
+- Test iOS Share Sheet on real devices
+- Validate RSS feeds with podcast apps
+
+## Task Generation Rules
+*Applied during main() execution*
+
+1. **From Contracts**:
+   - Each contract file → contract test task [P]
+   - Each endpoint → implementation task
+   
+2. **From Data Model**:
+   - Each entity → model creation task [P]
+   - Relationships → service layer tasks
+   
+3. **From User Stories**:
+   - Each story → integration test [P]
+   - Quickstart scenarios → validation tasks
+
+4. **Ordering**:
+   - Setup → Tests → Models → Services → Endpoints → Workflows → iOS → Polish
+   - Dependencies block parallel execution
+
+## Validation Checklist
+*GATE: Checked by main() before returning*
+
+- [x] All contracts have corresponding tests
+- [x] All entities have model tasks
+- [x] All tests come before implementation
+- [x] Parallel tasks truly independent
+- [x] Each task specifies exact file path
+- [x] No task modifies same file as another [P] task
+- [x] n8n workflows properly integrated
+- [x] iOS Share Sheet tasks included
+- [x] External service integrations covered
+- [x] RSS feed implementation complete
