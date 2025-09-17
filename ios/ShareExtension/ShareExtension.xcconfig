@@ -1,0 +1,31 @@
+// ShareExtension.xcconfig
+// Configuration settings for the Podcast Generator Share Extension
+
+// Bundle Configuration
+PRODUCT_BUNDLE_IDENTIFIER = com.podcastgenerator.shareextension
+PRODUCT_NAME = PodcastGeneratorShare
+DISPLAY_NAME = Podcast Generator
+
+// Deployment Target
+IPHONEOS_DEPLOYMENT_TARGET = 15.0
+TARGETED_DEVICE_FAMILY = 1,2
+
+// Code Signing
+CODE_SIGN_STYLE = Automatic
+DEVELOPMENT_TEAM = YOUR_TEAM_ID
+
+// App Groups
+CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements
+
+// Build Settings
+SWIFT_VERSION = 5.0
+SWIFT_OPTIMIZATION_LEVEL = -Onone
+GCC_OPTIMIZATION_LEVEL = 0
+
+// API Configuration
+API_BASE_URL = https://your-azure-functions-app.azurewebsites.net/api
+SHARE_EXTENSION_GROUP_ID = group.com.podcastgenerator.share
+
+// Debug Configuration
+DEBUG_INFORMATION_FORMAT = dwarf-with-dsym
+ENABLE_BITCODE = NO

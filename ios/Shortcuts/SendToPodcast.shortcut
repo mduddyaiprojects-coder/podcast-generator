@@ -1,0 +1,49 @@
+{
+  "WFWorkflowActions": [
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.gettext",
+      "WFWorkflowActionParameters": {
+        "WFTextActionText": "Share to Podcast Generator"
+      }
+    },
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.geturl",
+      "WFWorkflowActionParameters": {}
+    },
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.conditional",
+      "WFWorkflowActionParameters": {
+        "WFConditionalActionString": "URL",
+        "WFConditionalActionValue": "URL"
+      }
+    },
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.getcontentsofurl",
+      "WFWorkflowActionParameters": {
+        "WFHTTPMethod": "POST",
+        "WFHTTPHeaders": {
+          "Content-Type": "application/json"
+        },
+        "WFHTTPBody": "{\"url\": \"URL\", \"title\": \"Title\", \"description\": \"Text\", \"contentType\": \"url\"}"
+      }
+    }
+  ],
+  "WFWorkflowClientVersion": "900",
+  "WFWorkflowHasShortcutInputVariables": true,
+  "WFWorkflowIcon": {
+    "WFWorkflowIconImageData": "",
+    "WFWorkflowIconStartColor": 4278255360
+  },
+  "WFWorkflowImportQuestions": [],
+  "WFWorkflowInputContentItemClasses": [
+    "WFURLContentItem",
+    "WFStringContentItem"
+  ],
+  "WFWorkflowMinimumClientVersion": 900,
+  "WFWorkflowMinimumClientVersionString": "900",
+  "WFWorkflowNoInputBehavior": "Ask for Input",
+  "WFWorkflowTypes": [
+    "NCWidget",
+    "WatchKit"
+  ]
+}
