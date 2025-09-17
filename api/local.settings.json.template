@@ -1,0 +1,24 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "FUNCTIONS_EXTENSION_VERSION": "~4",
+    "NODE_ENV": "development",
+    "SUPABASE_URL": "your-supabase-url",
+    "SUPABASE_ANON_KEY": "your-supabase-anon-key",
+    "SUPABASE_SERVICE_ROLE_KEY": "your-supabase-service-role-key",
+    "AZURE_OPENAI_ENDPOINT": "your-azure-openai-endpoint",
+    "AZURE_OPENAI_API_KEY": "your-azure-openai-api-key",
+    "ELEVENLABS_API_KEY": "your-elevenlabs-api-key",
+    "FIRECRAWL_API_KEY": "your-firecrawl-api-key",
+    "AZURE_STORAGE_CONNECTION_STRING": "your-azure-storage-connection-string",
+    "DATABASE_URL": "your-postgresql-connection-string",
+    "CDN_BASE_URL": "your-cdn-base-url"
+  },
+  "Host": {
+    "LocalHttpPort": 7071,
+    "CORS": "*",
+    "CORSCredentials": false
+  }
+}
