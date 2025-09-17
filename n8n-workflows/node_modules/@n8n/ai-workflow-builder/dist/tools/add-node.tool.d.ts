@@ -1,0 +1,60 @@
+import type { INodeTypeDescription } from 'n8n-workflow';
+import { z } from 'zod';
+export declare const nodeCreationSchema: z.ZodObject<{
+    nodeType: z.ZodString;
+    name: z.ZodString;
+    connectionParametersReasoning: z.ZodString;
+    connectionParameters: z.ZodObject<{}, "passthrough", z.ZodTypeAny, z.objectOutputType<{}, z.ZodTypeAny, "passthrough">, z.objectInputType<{}, z.ZodTypeAny, "passthrough">>;
+}, "strip", z.ZodTypeAny, {
+    nodeType: string;
+    name: string;
+    connectionParametersReasoning: string;
+    connectionParameters: {} & {
+        [k: string]: unknown;
+    };
+}, {
+    nodeType: string;
+    name: string;
+    connectionParametersReasoning: string;
+    connectionParameters: {} & {
+        [k: string]: unknown;
+    };
+}>;
+export declare function createAddNodeTool(nodeTypes: INodeTypeDescription[]): {
+    tool: import("@langchain/core/tools").DynamicStructuredTool<z.ZodObject<{
+        nodeType: z.ZodString;
+        name: z.ZodString;
+        connectionParametersReasoning: z.ZodString;
+        connectionParameters: z.ZodObject<{}, "passthrough", z.ZodTypeAny, z.objectOutputType<{}, z.ZodTypeAny, "passthrough">, z.objectInputType<{}, z.ZodTypeAny, "passthrough">>;
+    }, "strip", z.ZodTypeAny, {
+        nodeType: string;
+        name: string;
+        connectionParametersReasoning: string;
+        connectionParameters: {} & {
+            [k: string]: unknown;
+        };
+    }, {
+        nodeType: string;
+        name: string;
+        connectionParametersReasoning: string;
+        connectionParameters: {} & {
+            [k: string]: unknown;
+        };
+    }>, {
+        nodeType: string;
+        name: string;
+        connectionParametersReasoning: string;
+        connectionParameters: {} & {
+            [k: string]: unknown;
+        };
+    }, {
+        nodeType: string;
+        name: string;
+        connectionParametersReasoning: string;
+        connectionParameters: {} & {
+            [k: string]: unknown;
+        };
+    }, import("@langchain/langgraph").Command<unknown>>;
+    displayTitle: string;
+    getCustomDisplayTitle: (input: Record<string, unknown>) => string;
+};

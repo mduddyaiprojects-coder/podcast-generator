@@ -1,0 +1,22 @@
+import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
+import type { INodeTypeDescription, Logger } from 'n8n-workflow';
+import { z } from 'zod';
+export declare function createUpdateNodeParametersTool(nodeTypes: INodeTypeDescription[], llm: BaseChatModel, logger?: Logger, instanceUrl?: string): {
+    tool: import("@langchain/core/tools").DynamicStructuredTool<z.ZodObject<{
+        nodeId: z.ZodString;
+        changes: z.ZodArray<z.ZodString, "many">;
+    }, "strip", z.ZodTypeAny, {
+        nodeId: string;
+        changes: string[];
+    }, {
+        nodeId: string;
+        changes: string[];
+    }>, {
+        nodeId: string;
+        changes: string[];
+    }, {
+        nodeId: string;
+        changes: string[];
+    }, import("@langchain/langgraph").Command<unknown>>;
+    displayTitle: string;
+};

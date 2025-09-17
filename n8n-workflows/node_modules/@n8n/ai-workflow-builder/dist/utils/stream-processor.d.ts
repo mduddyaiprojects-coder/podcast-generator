@@ -1,0 +1,12 @@
+import { AIMessage, HumanMessage, ToolMessage } from '@langchain/core/messages';
+import type { DynamicStructuredTool } from '@langchain/core/tools';
+import type { StreamOutput } from '../types/streaming';
+export interface BuilderTool {
+    tool: DynamicStructuredTool;
+    displayTitle: string;
+    getCustomDisplayTitle?: (values: Record<string, unknown>) => string;
+}
+export declare const DEFAULT_WORKFLOW_UPDATE_TOOLS: string[];
+export declare function processStreamChunk(streamMode: string, chunk: unknown): StreamOutput | null;
+export declare function createStreamProcessor(stream: AsyncGenerator<[string, unknown], void, unknown>): AsyncGenerator<StreamOutput>;
+export declare function formatMessages(messages: Array<AIMessage | HumanMessage | ToolMessage>, builderTools?: BuilderTool[]): Array<Record<string, unknown>>;

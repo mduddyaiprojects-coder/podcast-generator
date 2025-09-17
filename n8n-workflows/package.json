@@ -1,0 +1,36 @@
+{
+  "name": "podcast-generator-n8n-workflows",
+  "version": "1.0.0",
+  "description": "n8n workflows for podcast generation pipeline",
+  "main": "index.js",
+  "scripts": {
+    "start": "n8n start",
+    "dev": "n8n start --tunnel",
+    "import": "n8n import:workflow --input=workflows/",
+    "export": "n8n export:workflow --output=workflows/",
+    "test": "jest",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "keywords": [
+    "n8n",
+    "workflow",
+    "podcast",
+    "automation",
+    "content-processing"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "n8n": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "eslint": "^8.0.0",
+    "jest": "^29.0.0",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
