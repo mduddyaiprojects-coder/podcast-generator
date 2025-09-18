@@ -5,11 +5,11 @@ import { config } from 'dotenv';
 config({ path: '.env.test' });
 
 // Set test environment variables
-process.env.NODE_ENV = 'test';
-process.env.AZURE_FUNCTIONS_ENVIRONMENT = 'Development';
+process.env['NODE_ENV'] = 'test';
+process.env['AZURE_FUNCTIONS_ENVIRONMENT'] = 'Development';
 
 // Mock Azure Functions context for testing
-global.mockContext = {
+(global as any).mockContext = {
   log: jest.fn(),
   bindings: {},
   bindingData: {},
