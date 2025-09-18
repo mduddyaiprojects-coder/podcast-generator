@@ -27,13 +27,14 @@ export class ContentProcessor {
 
   async extractContent(submission: ContentSubmission): Promise<ExtractedContent> {
     try {
-      switch (submission.getContentType()) {
+      switch (submission.content_type) {
         case 'url':
-          return await this.extractFromUrl(submission.url!);
+          return await this.extractFromUrl(submission.content_url);
         case 'youtube':
-          return await this.extractFromYouTube(submission.youtubeUrl!);
+          return await this.extractFromYouTube(submission.content_url);
+        case 'pdf':
         case 'document':
-          return await this.extractFromDocument(submission.document!);
+          return await this.extractFromDocument(submission.content_url);
         default:
           throw new Error('Unsupported content type');
       }

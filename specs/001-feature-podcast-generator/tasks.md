@@ -64,20 +64,21 @@
 - [x] T016 [P] Integration test n8n workflow processing in tests/integration/test_workflow_processing.ts
 
 ## Phase 3.3: Core Implementation (ONLY after tests are failing)
-- [ ] T017 [P] ContentSubmission model in api/src/models/content-submission.ts
-- [ ] T018 [P] PodcastEpisode model in api/src/models/podcast-episode.ts
-- [ ] T019 [P] UserFeed model in api/src/models/user-feed.ts
-- [ ] T020 [P] ProcessingJob model in api/src/models/processing-job.ts
-- [ ] T021 [P] ContentExtractor service in api/src/services/content-extractor.ts
-- [ ] T022 [P] TTSService in api/src/services/tts-service.ts
-- [ ] T023 [P] RSSGenerator service in api/src/services/rss-generator.ts
-- [ ] T024 [P] StorageService in api/src/services/storage-service.ts
-- [ ] T025 POST /api/content Azure Function in api/src/functions/content-submission/
-- [ ] T026 GET /api/content/{id}/status Azure Function in api/src/functions/status-check/
-- [ ] T027 GET /api/feeds/{slug}/rss.xml Azure Function in api/src/functions/rss-feed/
-- [ ] T028 GET /api/feeds/{slug}/episodes Azure Function in api/src/functions/episodes-list/
-- [ ] T029 Input validation middleware in api/src/utils/validation.ts
-- [ ] T030 Error handling middleware in api/src/utils/error-handler.ts
+- [x] T017 [P] ContentSubmission model in api/src/models/content-submission.ts
+- [x] T018 [P] PodcastEpisode model in api/src/models/podcast-episode.ts
+- [x] T019 [P] UserFeed model in api/src/models/user-feed.ts
+- [x] T019B [P] Update data model for single public feed - remove UserFeed references and simplify architecture
+- [x] T020 [P] ProcessingJob model in api/src/models/processing-job.ts
+- [x] T021 [P] ContentExtractor service in api/src/services/content-extractor.ts
+- [x] T022 [P] TTSService in api/src/services/tts-service.ts
+- [x] T023 [P] RSSGenerator service in api/src/services/rss-generator.ts
+- [x] T024 [P] StorageService in api/src/services/storage-service.ts
+- [x] T025 POST /api/content Azure Function in api/src/functions/content-submission/
+- [x] T026 GET /api/content/{id}/status Azure Function in api/src/functions/status-check/
+- [x] T027 GET /api/feeds/{slug}/rss.xml Azure Function in api/src/functions/rss-feed/
+- [x] T028 GET /api/feeds/{slug}/episodes Azure Function in api/src/functions/episodes-list/
+- [x] T029 Input validation middleware in api/src/utils/validation.ts
+- [x] T030 Error handling middleware in api/src/utils/error-handler.ts
 
 ## Phase 3.4: n8n Workflow Implementation
 - [ ] T031 [P] Content processing workflow in n8n-workflows/content-processing.json

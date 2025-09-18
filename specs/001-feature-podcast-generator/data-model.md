@@ -37,7 +37,6 @@ Represents a generated podcast episode with metadata and audio file reference.
 
 **Fields**:
 - `id` (UUID, Primary Key): Unique identifier
-- `feed_id` (UUID, Foreign Key): Reference to UserFeed
 - `submission_id` (UUID, Foreign Key, NULL): Reference to ContentSubmission
 - `title` (TEXT, NOT NULL): Episode title
 - `description` (TEXT, NOT NULL): Episode description
@@ -62,17 +61,15 @@ Represents a generated podcast episode with metadata and audio file reference.
 - `pub_date` cannot be in the future
 
 **Indexes**:
-- `idx_podcast_episode_feed_id` on `feed_id`
 - `idx_podcast_episode_pub_date` on `pub_date DESC`
 - `idx_podcast_episode_content_type` on `content_type`
 - `idx_podcast_episode_created_at` on `created_at DESC`
 
-### UserFeed
-Represents a user's personal podcast feed containing all their generated episodes.
+### GlobalFeed
+Represents the single public podcast feed containing all generated episodes.
 
 **Fields**:
-- `id` (UUID, Primary Key): Unique identifier
-- `slug` (TEXT, UNIQUE, NOT NULL): URL-safe identifier for RSS feed
+- `id` (UUID, Primary Key): Unique identifier (always 'global')
 - `title` (TEXT, NOT NULL): Feed title
 - `description` (TEXT, NULL): Feed description
 - `author` (TEXT, NULL): Feed author name
@@ -85,14 +82,12 @@ Represents a user's personal podcast feed containing all their generated episode
 - `updated_at` (TIMESTAMPTZ, NOT NULL, DEFAULT NOW()): Last update timestamp
 
 **Validation Rules**:
-- `slug` must be URL-safe (alphanumeric, hyphens, underscores)
 - `title` must be 1-100 characters
 - `admin_email` must be valid email format
 - `tts_voice_id` required when tts_provider = 'elevenlabs'
 
 **Indexes**:
-- `idx_user_feed_slug` on `slug`
-- `idx_user_feed_created_at` on `created_at DESC`
+- `idx_global_feed_created_at` on `created_at DESC`
 
 ### ProcessingJob
 Represents a background processing job for content conversion.
@@ -129,10 +124,10 @@ Represents a background processing job for content conversion.
 - **Constraint**: `submission_id` can be NULL (episodes can exist without submissions)
 - **Cascade**: SET NULL on submission deletion
 
-### UserFeed → PodcastEpisode
-- **Type**: One-to-Many
-- **Constraint**: `feed_id` is required
-- **Cascade**: CASCADE on feed deletion (episodes are deleted with feed)
+### GlobalFeed → PodcastEpisode
+- **Type**: One-to-Many (implicit)
+- **Constraint**: All episodes belong to the single global feed
+- **Cascade**: Episodes are managed by the global feed
 
 ### ContentSubmission → ProcessingJob
 - **Type**: One-to-One
@@ -217,13 +212,12 @@ failed ←────┘
 - `processing_job.retry_count` <= `processing_job.max_retries`
 
 ### Unique Constraints
-- `user_feed.slug` UNIQUE
+- `global_feed.id` UNIQUE (always 'global')
 - `content_submission.id` UNIQUE
 - `podcast_episode.id` UNIQUE
 - `processing_job.id` UNIQUE
 
 ### Foreign Key Constraints
-- `podcast_episode.feed_id` REFERENCES `user_feed(id)` ON DELETE CASCADE
 - `podcast_episode.submission_id` REFERENCES `content_submission(id)` ON DELETE SET NULL
 - `processing_job.submission_id` REFERENCES `content_submission(id)` ON DELETE CASCADE
 

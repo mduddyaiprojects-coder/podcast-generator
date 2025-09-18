@@ -13,7 +13,11 @@ export class PodcastGenerator {
   constructor() {
     this.azureOpenAIService = new AzureOpenAIService();
     this.elevenLabsService = new ElevenLabsService();
-    this.storageService = new StorageService();
+    this.storageService = new StorageService({
+      connectionString: process.env['AZURE_STORAGE_CONNECTION_STRING'] || '',
+      containerName: process.env['AZURE_STORAGE_CONTAINER_NAME'] || 'podcast-audio',
+      cdnBaseUrl: process.env['AZURE_CDN_BASE_URL']
+    });
   }
 
   async generateEpisode(content: ExtractedContent, submissionId: string): Promise<PodcastEpisode> {
@@ -25,7 +29,7 @@ export class PodcastGenerator {
       const audioBuffer = await this.elevenLabsService.generateAudio(script);
 
       // Upload audio to storage
-      const audioUrl = await this.storageService.uploadAudio(audioBuffer, submissionId);
+      const audioResult = await this.storageService.uploadAudio(audioBuffer, submissionId);
 
       // Calculate duration (estimate)
       const duration = this.estimateDuration(script);
@@ -35,16 +39,12 @@ export class PodcastGenerator {
         id: this.generateEpisodeId(),
         title: content.title,
         description: content.summary,
-        audioUrl,
-        duration,
-        publishedAt: new Date(),
-        submissionId,
-        metadata: {
-          originalUrl: content.metadata.originalUrl,
-          originalTitle: content.metadata.originalTitle,
-          author: content.metadata.author,
-          tags: this.generateTags(content)
-        }
+        source_url: content.metadata.originalUrl || '',
+        content_type: 'url', // Default to URL type
+        audio_url: audioResult.url,
+        audio_duration: duration,
+        pub_date: new Date(),
+        submission_id: submissionId
       });
 
       return episode;
@@ -65,17 +65,4 @@ export class PodcastGenerator {
     return Math.ceil((wordCount / 150) * 60);
   }
 
-  private generateTags(content: ExtractedContent): string[] {
-    const tags = ['podcast', 'ai-generated'];
-    
-    if (content.metadata.originalUrl) {
-      tags.push('web-content');
-    }
-    
-    if (content.metadata.author) {
-      tags.push('author-content');
-    }
-
-    return tags;
-  }
 }

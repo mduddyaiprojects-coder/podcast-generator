@@ -1,27 +1,18 @@
 import Joi from 'joi';
 import { HttpRequest } from '@azure/functions';
+import { ValidationMiddleware, CommonSchemas, ValidationUtils } from './validation-middleware';
 
+// Legacy validation functions for backward compatibility
 const contentSubmissionSchema = Joi.object({
-  url: Joi.string().uri().optional(),
-  youtubeUrl: Joi.string().pattern(/^https?:\/\/(www\.)?(youtube\.com|youtu\.be)\/.+/).optional(),
-  document: Joi.object({
-    content: Joi.string().required(),
-    title: Joi.string().required(),
-    type: Joi.string().valid('pdf', 'docx', 'txt').required()
-  }).optional(),
-  metadata: Joi.object({
-    title: Joi.string().optional(),
-    description: Joi.string().optional(),
-    author: Joi.string().optional()
-  }).optional()
-}).custom((value, helpers) => {
-  // At least one content type must be provided
-  if (!value.url && !value.youtubeUrl && !value.document) {
-    return helpers.error('custom.atLeastOneContent');
-  }
-  return value;
+  content_url: Joi.string().uri().required(),
+  content_type: Joi.string().valid('url', 'youtube', 'pdf', 'document').required(),
+  user_note: Joi.string().max(500).optional()
 }).messages({
-  'custom.atLeastOneContent': 'At least one content type (url, youtubeUrl, or document) must be provided'
+  'content_url.required': 'content_url is required',
+  'content_url.uri': 'content_url must be a valid URL',
+  'content_type.required': 'content_type is required',
+  'content_type.valid': 'content_type must be one of: url, youtube, pdf, document',
+  'user_note.max': 'user_note cannot exceed 500 characters'
 });
 
 export interface ValidationResult {
@@ -29,6 +20,10 @@ export interface ValidationResult {
   errors?: string[];
 }
 
+/**
+ * Legacy content submission validation (for backward compatibility)
+ * @deprecated Use ValidationMiddleware.validateRequest with CommonSchemas.contentSubmission instead
+ */
 export async function validateContentSubmission(request: HttpRequest): Promise<ValidationResult> {
   try {
     const body = await request.json();
@@ -51,16 +46,21 @@ export async function validateContentSubmission(request: HttpRequest): Promise<V
   }
 }
 
+/**
+ * Legacy URL validation (for backward compatibility)
+ * @deprecated Use ValidationUtils.isValidUrl instead
+ */
 export function validateUrl(url: string): boolean {
-  try {
-    new URL(url);
-    return true;
-  } catch {
-    return false;
-  }
+  return ValidationUtils.isValidUrl(url);
 }
 
+/**
+ * Legacy YouTube URL validation (for backward compatibility)
+ * @deprecated Use ValidationUtils.isValidYouTubeUrl instead
+ */
 export function validateYouTubeUrl(url: string): boolean {
-  const youtubeRegex = /^https?:\/\/(www\.)?(youtube\.com|youtu\.be)\/.+/;
-  return youtubeRegex.test(url);
+  return ValidationUtils.isValidYouTubeUrl(url);
 }
+
+// Re-export new validation utilities
+export { ValidationMiddleware, CommonSchemas, ValidationUtils, withValidation } from './validation-middleware';
