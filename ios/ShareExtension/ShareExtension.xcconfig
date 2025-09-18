@@ -29,3 +29,4 @@ SHARE_EXTENSION_GROUP_ID = group.com.podcastgenerator.share
 // Debug Configuration
 DEBUG_INFORMATION_FORMAT = dwarf-with-dsym
 ENABLE_BITCODE = NO
+

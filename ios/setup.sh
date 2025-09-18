@@ -162,3 +162,4 @@ echo "  - ShareExtension.xcconfig: Development team ID"
 echo "  - ShareExtension.entitlements: App Groups ID"
 echo ""
 echo "For detailed setup instructions, see README.md"
+

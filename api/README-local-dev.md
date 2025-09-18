@@ -165,3 +165,4 @@ After the local development environment is set up:
 - [Azure Functions Core Tools](https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local)
 - [Azure Functions TypeScript Guide](https://docs.microsoft.com/en-us/azure/azure-functions/functions-reference-node)
 - [Local Development Best Practices](https://docs.microsoft.com/en-us/azure/azure-functions/functions-develop-local)
+

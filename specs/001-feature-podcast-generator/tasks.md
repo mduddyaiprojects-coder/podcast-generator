@@ -54,14 +54,14 @@
 ## Phase 3.2: Tests First (TDD) ⚠️ MUST COMPLETE BEFORE 3.3
 **CRITICAL: These tests MUST be written and MUST FAIL before ANY implementation**
 
-- [ ] T009 [P] Contract test POST /api/content in tests/contract/test_content_submission.py
-- [ ] T010 [P] Contract test GET /api/content/{id}/status in tests/contract/test_status_check.py
-- [ ] T011 [P] Contract test GET /api/feeds/{slug}/rss.xml in tests/contract/test_rss_feed.py
-- [ ] T012 [P] Contract test GET /api/feeds/{slug}/episodes in tests/contract/test_episodes_list.py
-- [ ] T013 [P] Integration test content submission flow in tests/integration/test_submission_flow.py
-- [ ] T014 [P] Integration test RSS feed generation in tests/integration/test_rss_generation.py
-- [ ] T015 [P] Integration test iOS Share Sheet in tests/integration/test_ios_integration.py
-- [ ] T016 [P] Integration test n8n workflow processing in tests/integration/test_workflow_processing.py
+- [x] T009 [P] Contract test POST /api/content in tests/contract/test_content_submission.py
+- [x] T010 [P] Contract test GET /api/content/{id}/status in tests/contract/test_status_check.py
+- [x] T011 [P] Contract test GET /api/feeds/{slug}/rss.xml in tests/contract/test_rss_feed.py
+- [x] T012 [P] Contract test GET /api/feeds/{slug}/episodes in tests/contract/test_episodes_list.py
+- [x] T013 [P] Integration test content submission flow in tests/integration/test_submission_flow.py
+- [x] T014 [P] Integration test RSS feed generation in tests/integration/test_rss_generation.py
+- [x] T015 [P] Integration test iOS Share Sheet in tests/integration/test_ios_integration.ts
+- [x] T016 [P] Integration test n8n workflow processing in tests/integration/test_workflow_processing.ts
 
 ## Phase 3.3: Core Implementation (ONLY after tests are failing)
 - [ ] T017 [P] ContentSubmission model in api/src/models/content-submission.ts
