@@ -1,0 +1,193 @@
+{
+  "name": "TTS Generation Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "generate-tts",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "TTS Generation Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "tts-generation-webhook"
+    },
+    {
+      "parameters": {
+        "functionCode": "// Simple validation for TTS generation\nconst { submission_id, text_content, voice_settings } = $input.first().json;\n\nconsole.log('n8n: Processing TTS generation:', { submission_id, text_length: text_content?.length });\n\n// Basic validation\nif (!submission_id) {\n  throw new Error('Missing required field: submission_id');\n}\n\nif (!text_content || text_content.trim().length === 0) {\n  throw new Error('Missing or empty text_content field');\n}\n\n// Validate text length (reasonable limits)\nif (text_content.length > 50000) {\n  throw new Error('Text content too long. Maximum 50,000 characters allowed.');\n}\n\n// Prepare TTS request data\nconst ttsData = {\n  submission_id,\n  text_content: text_content.trim(),\n  voice_settings: {\n    voice_id: voice_settings?.voice_id || 'default',\n    speed: voice_settings?.speed || 1.0,\n    pitch: voice_settings?.pitch || 1.0,\n    ...voice_settings\n  },\n  metadata: {\n    text_length: text_content.length,\n    word_count: text_content.split(' ').length,\n    estimated_duration: Math.ceil(text_content.split(' ').length / 3), // ~3 words per second\n    generation_type: 'tts'\n  },\n  workflow_source: 'n8n-tts'\n};\n\nreturn { json: ttsData };"
+      },
+      "id": "validate-tts-input",
+      "name": "Validate TTS Input",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://your-azure-functions-app.azurewebsites.net/api/tts/generate",
+        "authentication": "none",
+        "requestMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Workflow-Source",
+              "value": "n8n-tts"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "submission_id",
+              "value": "={{$json.submission_id}}"
+            },
+            {
+              "name": "text_content",
+              "value": "={{$json.text_content}}"
+            },
+            {
+              "name": "voice_settings",
+              "value": "={{JSON.stringify($json.voice_settings)}}"
+            },
+            {
+              "name": "metadata",
+              "value": "={{JSON.stringify($json.metadata)}}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "id": "call-azure-functions",
+      "name": "Call Azure Functions TTS",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Handle Azure Functions TTS response\nconst response = $input.first().json;\n\nconsole.log('n8n: TTS generation response:', response);\n\n// Check if the API call was successful\nif (response.error) {\n  throw new Error(`Azure Functions TTS Error: ${response.message || 'Unknown error'}`);\n}\n\n// Return success response\nreturn {\n  json: {\n    success: true,\n    message: 'TTS generation initiated via n8n',\n    submission_id: response.submission_id,\n    status: response.status || 'processing',\n    audio_url: response.audio_url,\n    duration: response.duration,\n    voice_used: response.voice_used,\n    text_length: $('Validate TTS Input').item.json.metadata.text_length,\n    estimated_duration: $('Validate TTS Input').item.json.metadata.estimated_duration,\n    timestamp: new Date().toISOString()\n  }\n};"
+      },
+      "id": "handle-response",
+      "name": "Handle Response",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{JSON.stringify($json)}}"
+      },
+      "id": "webhook-response",
+      "name": "Webhook Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Simple error handling\nconst error = $input.first().json;\n\nconsole.error('n8n: TTS generation error:', error);\n\n// Return error response\nreturn {\n  json: {\n    success: false,\n    error: error.message || 'Unknown error occurred',\n    submission_id: $('Validate TTS Input').item?.json?.submission_id || null,\n    timestamp: new Date().toISOString()\n  }\n};"
+      },
+      "id": "error-handler",
+      "name": "Error Handler",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [900, 500]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{JSON.stringify($json)}}",
+        "responseCode": 500
+      },
+      "id": "error-response",
+      "name": "Error Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1120, 500]
+    }
+  ],
+  "connections": {
+    "TTS Generation Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate TTS Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate TTS Input": {
+      "main": [
+        [
+          {
+            "node": "Call Azure Functions TTS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Azure Functions TTS": {
+      "main": [
+        [
+          {
+            "node": "Handle Response",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Error Handler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handle Response": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error Handler": {
+      "main": [
+        [
+          {
+            "node": "Error Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "id": "tts-generation-workflow",
+  "tags": ["tts", "text-to-speech", "audio", "podcast", "automation"]
+}

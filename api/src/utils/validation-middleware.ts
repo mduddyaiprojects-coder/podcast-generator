@@ -178,7 +178,7 @@ export class ValidationMiddleware {
   /**
    * Map Joi error types to our error codes
    */
-  private static getErrorCode(type: string, field?: string): string {
+  private static getErrorCode(type: string, _field?: string): string {
     switch (type) {
       case 'any.required':
         return 'REQUIRED_FIELD';

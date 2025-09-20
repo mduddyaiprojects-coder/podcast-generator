@@ -133,7 +133,7 @@ export class TTSService {
       logger.warn(`Primary TTS provider ${preferredProvider} failed, trying fallback`);
       
       const fallbackProvider = preferredProvider === 'elevenlabs' ? 'azure' : 'elevenlabs';
-      const fallbackConfig = { ...mergedConfig, provider: fallbackProvider };
+      const fallbackConfig = { ...mergedConfig, provider: fallbackProvider as TTSProvider };
       
       return await this.generateAudio(text, fallbackConfig);
     }
@@ -340,7 +340,7 @@ export class TTSService {
   /**
    * Get recommended voice for content type
    */
-  getRecommendedVoice(contentType: string, language: string = 'en'): { provider: TTSProvider; voice_id: string } {
+  getRecommendedVoice(contentType: string, _language: string = 'en'): { provider: TTSProvider; voice_id: string } {
     const recommendations: Record<string, { provider: TTSProvider; voice_id: string }> = {
       'url': { provider: 'elevenlabs', voice_id: 'rachel' },
       'youtube': { provider: 'elevenlabs', voice_id: 'drew' },

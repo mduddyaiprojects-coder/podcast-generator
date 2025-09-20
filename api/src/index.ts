@@ -9,6 +9,8 @@ import { statusCheckFunction } from './functions/status-check';
 import { rssFeedFunction } from './functions/rss-feed';
 import { episodesListFunction } from './functions/episodes-list';
 import { healthCheckFunction } from './functions/health-check';
+import { ttsGenerationFunction } from './functions/tts-generation';
+import { youtubeExtractionFunction } from './functions/youtube-extraction';
 
 // Register all functions with the Azure Functions runtime
 
@@ -50,4 +52,20 @@ app.http('episodes-list', {
     authLevel: 'anonymous',
     route: 'feeds/{slug}/episodes',
     handler: episodesListFunction
+});
+
+// TTS generation endpoint (T034)
+app.http('tts-generation', {
+    methods: ['POST'],
+    authLevel: 'anonymous',
+    route: 'tts',
+    handler: ttsGenerationFunction
+});
+
+// YouTube extraction endpoint (T032)
+app.http('youtube-extraction', {
+    methods: ['POST'],
+    authLevel: 'anonymous',
+    route: 'youtube-extract',
+    handler: youtubeExtractionFunction
 });

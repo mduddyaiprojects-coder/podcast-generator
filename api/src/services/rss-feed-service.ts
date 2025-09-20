@@ -12,13 +12,13 @@ export class RssFeedService {
     this.rssGenerator = new RssGenerator();
   }
 
-  async generateRssFeed(feedId?: string): Promise<string> {
+  async generateRssFeed(_feedId?: string): Promise<string> {
     try {
-      // Get episodes from database
-      const episodes = await this.databaseService.getEpisodes(feedId);
+      // Get episodes from database (limit to 50 episodes for RSS feed)
+      const episodes = await this.databaseService.getEpisodes(50, 0);
 
       // Generate RSS XML
-      const rssContent = await this.rssGenerator.generateRss(episodes, feedId);
+      const rssContent = await this.rssGenerator.generateRss(episodes);
 
       return rssContent;
 

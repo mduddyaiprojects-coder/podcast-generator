@@ -32,6 +32,7 @@ export interface ContentSubmissionData {
   extracted_content?: string;
   metadata?: ContentSubmissionMetadata;
   created_at?: Date;
+  updated_at?: Date;
   processed_at?: Date;
   source?: string;
   device_info?: {
@@ -54,6 +55,7 @@ export class ContentSubmission {
   public readonly extracted_content?: string;
   public readonly metadata?: ContentSubmissionMetadata;
   public readonly created_at: Date;
+  public readonly updated_at: Date;
   public readonly processed_at?: Date;
   public readonly source?: string;
   public readonly device_info?: ContentSubmissionData['device_info'];
@@ -68,6 +70,7 @@ export class ContentSubmission {
     this.extracted_content = data.extracted_content;
     this.metadata = data.metadata;
     this.created_at = data.created_at || new Date();
+    this.updated_at = data.updated_at || new Date();
     this.processed_at = data.processed_at;
     this.source = data.source;
     this.device_info = data.device_info;
@@ -142,6 +145,7 @@ export class ContentSubmission {
       extracted_content: this.extracted_content,
       metadata: this.metadata,
       created_at: this.created_at,
+      updated_at: new Date(),
       processed_at: newStatus === 'completed' || newStatus === 'failed' ? new Date() : this.processed_at,
       source: this.source,
       device_info: this.device_info
@@ -164,6 +168,7 @@ export class ContentSubmission {
       extracted_content: extractedContent,
       metadata: this.metadata,
       created_at: this.created_at,
+      updated_at: new Date(),
       processed_at: this.processed_at,
       source: this.source,
       device_info: this.device_info
@@ -186,6 +191,7 @@ export class ContentSubmission {
       extracted_content: this.extracted_content,
       metadata: { ...this.metadata, ...metadata },
       created_at: this.created_at,
+      updated_at: new Date(),
       processed_at: this.processed_at,
       source: this.source,
       device_info: this.device_info
@@ -296,6 +302,7 @@ export class ContentSubmission {
       extracted_content: this.extracted_content,
       metadata: this.metadata,
       created_at: this.created_at,
+      updated_at: this.updated_at,
       processed_at: this.processed_at,
       source: this.source,
       device_info: this.device_info

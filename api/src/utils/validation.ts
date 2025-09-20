@@ -1,6 +1,6 @@
 import Joi from 'joi';
 import { HttpRequest } from '@azure/functions';
-import { ValidationMiddleware, CommonSchemas, ValidationUtils } from './validation-middleware';
+import { ValidationUtils } from './validation-middleware';
 
 // Legacy validation functions for backward compatibility
 const contentSubmissionSchema = Joi.object({

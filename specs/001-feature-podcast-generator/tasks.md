@@ -81,13 +81,13 @@
 - [x] T030 Error handling middleware in api/src/utils/error-handler.ts
 
 ## Phase 3.4: n8n Workflow Implementation
-- [ ] T031 [P] Content processing workflow in n8n-workflows/content-processing.json
-- [ ] T032 [P] YouTube extraction workflow in n8n-workflows/youtube-extraction.json
-- [ ] T033 [P] Document processing workflow in n8n-workflows/document-processing.json
-- [ ] T034 [P] TTS generation workflow in n8n-workflows/tts-generation.json
-- [ ] T035 [P] Error handling workflow in n8n-workflows/error-handling.json
-- [ ] T036 Configure n8n webhook endpoints and credentials
-- [ ] T037 Set up n8n workflow monitoring and logging
+- [x] T031 [P] Content processing workflow in n8n-workflows/content-processing.json
+- [x] T032 [P] YouTube extraction workflow in n8n-workflows/youtube-extraction.json
+- [x] T033 [P] Document processing workflow in n8n-workflows/document-processing.json
+- [x] T034 [P] TTS generation workflow in n8n-workflows/tts-generation.json
+- [x] T035 [P] Error handling workflow in n8n-workflows/error-handling.json
+- [x] T036 Configure n8n webhook endpoints and credentials
+- [x] T037 Set up n8n workflow monitoring and logging
 - [ ] T038 Test n8n workflow execution with sample content
 
 ## Phase 3.5: iOS Integration

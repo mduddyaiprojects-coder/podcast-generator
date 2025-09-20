@@ -99,7 +99,13 @@ export class ErrorHandler {
     }
     
     // Create error response
-    const errorResponse = this.createErrorResponse(errorInfo, requestId, mergedConfig);
+    const errorResponse = this.createErrorResponse(
+      errorInfo.type,
+      errorInfo.message,
+      errorInfo.status,
+      errorInfo.details,
+      requestId
+    );
     
     return {
       status: errorInfo.status,
@@ -346,24 +352,6 @@ export class ErrorHandler {
     };
   }
 
-  /**
-   * Create error response object
-   */
-  private static createErrorResponse(
-    errorInfo: { type: ErrorType; status: number; message: string; details?: string },
-    requestId: string | undefined,
-    config: ErrorHandlerConfig
-  ): ErrorResponse {
-    const response: ErrorResponse = {
-      error: errorInfo.type,
-      message: errorInfo.message,
-      timestamp: new Date().toISOString(),
-      ...(requestId && { request_id: requestId }),
-      ...(errorInfo.details && { details: errorInfo.details })
-    };
-
-    return response;
-  }
 
   /**
    * Log error with appropriate level
@@ -372,7 +360,7 @@ export class ErrorHandler {
     error: Error | unknown,
     errorInfo: { type: ErrorType; status: number; message: string; details?: string },
     request: HttpRequest,
-    context: InvocationContext,
+    _context: InvocationContext,
     requestId: string | undefined
   ): void {
     const logData = {

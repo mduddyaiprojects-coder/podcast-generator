@@ -60,22 +60,6 @@ export class DatabaseService {
     }
   }
 
-  async updateSubmissionStatus(submissionId: string, status: string): Promise<void> {
-    try {
-      const query = `
-        UPDATE content_submissions 
-        SET status = $1, processed_at = NOW()
-        WHERE id = $2
-      `;
-      
-      await this.client.query(query, [status, submissionId]);
-      logger.info(`Updated submission ${submissionId} status to ${status}`);
-
-    } catch (error) {
-      logger.error('Failed to update submission status:', error);
-      throw error;
-    }
-  }
 
   async saveEpisode(episode: PodcastEpisode): Promise<void> {
     try {
@@ -89,15 +73,15 @@ export class DatabaseService {
       
       const values = [
         episode.id,
-        episode.submissionId,
-        episode.feedId,
+        episode.submission_id,
+        undefined, // feed_id removed - using single public feed
         episode.title,
         episode.description,
-        episode.audioUrl,
-        episode.duration,
+        episode.audio_url,
+        episode.audio_duration,
         episode.getEnclosureLength(),
-        episode.publishedAt,
-        JSON.stringify(episode.metadata || {})
+        episode.pub_date,
+        JSON.stringify({}) // metadata not available in PodcastEpisode model
       ];
 
       await this.client.query(query, values);
@@ -197,7 +181,8 @@ export class DatabaseService {
         user_note: row.user_note,
         status: row.status,
         created_at: row.created_at,
-        updated_at: row.updated_at
+        updated_at: row.updated_at,
+        processed_at: row.processed_at
       });
     } catch (error) {
       logger.error('Failed to get submission:', error);
@@ -209,6 +194,7 @@ export class DatabaseService {
     try {
       const query = 'UPDATE content_submissions SET status = $1, updated_at = NOW() WHERE id = $2';
       await this.client.query(query, [status, submissionId]);
+      logger.info(`Updated submission ${submissionId} status to ${status}`);
     } catch (error) {
       logger.error('Failed to update submission status:', error);
       throw error;

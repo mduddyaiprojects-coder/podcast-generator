@@ -92,7 +92,7 @@ jspm_packages/
 .vscode-test
 
 # IDE files
-.vscode/
+
 .idea/
 *.swp
 *.swo

@@ -1,4 +1,4 @@
-import { ContentSubmission, ContentType, ContentSubmissionMetadata } from '../models/content-submission';
+import { ContentSubmission, ContentSubmissionMetadata } from '../models/content-submission';
 import { FirecrawlService } from './firecrawl-service';
 import { AzureOpenAIService } from './azure-openai-service';
 import { logger } from '../utils/logger';
@@ -299,7 +299,7 @@ export class ContentExtractor {
     for (const pattern of patterns) {
       const match = url.match(pattern);
       if (match) {
-        return match[1];
+        return match[1] || null;
       }
     }
 
@@ -327,7 +327,7 @@ export class ContentExtractor {
   /**
    * Get YouTube video transcript
    */
-  private async getYouTubeTranscript(videoId: string): Promise<string | null> {
+  private async getYouTubeTranscript(_videoId: string): Promise<string | null> {
     // TODO: Implement YouTube transcript extraction
     // This would use YouTube API or a service like Firecrawl
     logger.warn('YouTube transcript extraction not implemented');
@@ -428,7 +428,7 @@ export class ContentExtractor {
       const filename = pathname.split('/').pop();
       
       if (filename && filename.includes('.')) {
-        return filename.split('.')[0].replace(/[-_]/g, ' ');
+        return filename.split('.')[0]?.replace(/[-_]/g, ' ') || 'Untitled';
       }
       
       return urlObj.hostname;
