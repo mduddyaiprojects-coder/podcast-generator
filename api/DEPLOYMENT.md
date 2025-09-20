@@ -98,3 +98,6 @@ The custom `deploy-minimal.sh` script was removed because:
 - Microsoft's tool handles edge cases and error scenarios better
 - Simpler deployment process with fewer failure points
 - Better integration with Azure Functions runtime
+
+
+

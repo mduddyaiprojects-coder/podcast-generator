@@ -1,0 +1,25 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "npm: build",
+      "type": "npm",
+      "script": "build",
+      "group": "build",
+      "presentation": {
+        "panel": "shared",
+        "reveal": "silent"
+      },
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "type": "npm",
+      "script": "install",
+      "group": "build",
+      "presentation": {
+        "panel": "shared",
+        "reveal": "silent"
+      }
+    }
+  ]
+}

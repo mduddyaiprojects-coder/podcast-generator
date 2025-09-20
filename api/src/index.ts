@@ -11,6 +11,7 @@ import { episodesListFunction } from './functions/episodes-list';
 import { healthCheckFunction } from './functions/health-check';
 import { ttsGenerationFunction } from './functions/tts-generation';
 import { youtubeExtractionFunction } from './functions/youtube-extraction';
+import { webhookShareFunction } from './functions/webhook-share';
 
 // Register all functions with the Azure Functions runtime
 
@@ -68,4 +69,12 @@ app.http('youtube-extraction', {
     authLevel: 'anonymous',
     route: 'youtube-extract',
     handler: youtubeExtractionFunction
+});
+
+// Webhook share endpoint (T097) - for iOS Shortcuts integration
+app.http('webhook-share', {
+    methods: ['POST'],
+    authLevel: 'anonymous',
+    route: 'webhook/share',
+    handler: webhookShareFunction
 });
