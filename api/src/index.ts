@@ -1,36 +1,53 @@
+// Main Azure Functions entry point
+// This file imports and registers all the functions defined in the functions/ directory
+
 import { app } from '@azure/functions';
+
+// Import all function handlers
 import { contentSubmissionFunction } from './functions/content-submission';
+import { statusCheckFunction } from './functions/status-check';
 import { rssFeedFunction } from './functions/rss-feed';
+import { episodesListFunction } from './functions/episodes-list';
 import { healthCheckFunction } from './functions/health-check';
-import storageManagementFunction from './functions/storage-management';
 
-// Register Azure Functions
-app.http('contentSubmission', {
-  methods: ['POST'],
-  authLevel: 'anonymous',
-  route: 'content',
-  handler: contentSubmissionFunction
+// Register all functions with the Azure Functions runtime
+
+// Health check endpoint
+app.http('health-check', {
+    methods: ['GET'],
+    authLevel: 'anonymous',
+    route: 'health',
+    handler: healthCheckFunction
 });
 
-app.http('rssFeed', {
-  methods: ['GET'],
-  authLevel: 'anonymous', 
-  route: 'rss/{feedId?}',
-  handler: rssFeedFunction
+// Content submission endpoint (T025)
+app.http('content-submission', {
+    methods: ['POST'],
+    authLevel: 'anonymous',
+    route: 'content',
+    handler: contentSubmissionFunction
 });
 
-app.http('healthCheck', {
-  methods: ['GET'],
-  authLevel: 'anonymous',
-  route: 'health',
-  handler: healthCheckFunction
+// Status check endpoint (T026)
+app.http('status-check', {
+    methods: ['GET'],
+    authLevel: 'anonymous',
+    route: 'content/{id}/status',
+    handler: statusCheckFunction
 });
 
-app.http('storageManagement', {
-  methods: ['GET', 'POST', 'DELETE'],
-  authLevel: 'function',
-  route: 'storage',
-  handler: storageManagementFunction
+// RSS feed endpoint (T027)
+app.http('rss-feed', {
+    methods: ['GET'],
+    authLevel: 'anonymous',
+    route: 'feeds/{slug}/rss.xml',
+    handler: rssFeedFunction
 });
 
-export default app;
+// Episodes list endpoint (T028)
+app.http('episodes-list', {
+    methods: ['GET'],
+    authLevel: 'anonymous',
+    route: 'feeds/{slug}/episodes',
+    handler: episodesListFunction
+});

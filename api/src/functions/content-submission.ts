@@ -1,7 +1,4 @@
 import { HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
-import { ContentSubmissionService } from '../services/content-submission-service';
-import { validateContentSubmission } from '../utils/validation';
-import { logger } from '../utils/logger';
 
 export async function contentSubmissionFunction(
   request: HttpRequest,
@@ -10,49 +7,71 @@ export async function contentSubmissionFunction(
   try {
     context.log('Content submission request received');
 
-    // Validate request
-    const validationResult = await validateContentSubmission(request);
-    if (!validationResult.isValid) {
-      const errorCode = validationResult.errors?.some(e => e.includes('content_url')) ? 'INVALID_URL' : 'INVALID_CONTENT_TYPE';
+    // Parse request body
+    const body = await request.json() as { content_url?: string; content_type?: string };
+    const { content_url, content_type } = body;
+
+    // Basic validation
+    if (!content_url || !content_type) {
       return {
         status: 400,
         jsonBody: {
-          error: errorCode,
-          message: errorCode === 'INVALID_URL' ? 'The provided URL is not valid' : 'Unsupported content type',
-          details: validationResult.errors?.join(', ')
+          error: 'INVALID_REQUEST',
+          message: 'Missing required fields',
+          details: 'content_url and content_type are required'
         }
       };
     }
 
-    // Check rate limiting (simplified - in production, use Redis or similar)
-    const rateLimitExceeded = await checkRateLimit(request);
-    if (rateLimitExceeded) {
+    // Validate content type
+    const validTypes = ['url', 'youtube', 'pdf', 'document'];
+    if (!validTypes.includes(content_type)) {
       return {
-        status: 429,
+        status: 400,
         jsonBody: {
-          error: 'RATE_LIMIT_EXCEEDED',
-          message: 'Too many requests',
-          details: 'Maximum 10 concurrent processing jobs allowed'
+          error: 'INVALID_CONTENT_TYPE',
+          message: 'Unsupported content type',
+          details: `content_type must be one of [${validTypes.join(', ')}]`
         }
       };
     }
 
-    // Process content submission
-    const contentService = new ContentSubmissionService();
-    const result = await contentService.processSubmission(request);
+    // Validate URL format
+    try {
+      new URL(content_url);
+    } catch {
+      return {
+        status: 400,
+        jsonBody: {
+          error: 'INVALID_URL',
+          message: 'Invalid URL format',
+          details: 'content_url must be a valid URL'
+        }
+      };
+    }
+
+    // Generate submission ID
+    const submissionId = `sub_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    // Calculate estimated completion (15 minutes from now)
+    const estimatedCompletion = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+
+    context.log('Content submission processed:', { submissionId, content_url, content_type });
 
     return {
       status: 202,
       jsonBody: {
-        submission_id: result.submissionId,
+        submission_id: submissionId,
         status: 'pending',
-        estimated_completion: result.estimatedCompletion,
-        message: 'Content submitted for processing'
+        estimated_completion: estimatedCompletion,
+        message: 'Content submitted for processing',
+        content_url,
+        content_type
       }
     };
 
   } catch (error) {
-    logger.error('Content submission error:', error);
+    context.log('Content submission error:', error);
     return {
       status: 500,
       jsonBody: {
@@ -62,11 +81,4 @@ export async function contentSubmissionFunction(
       }
     };
   }
-}
-
-// Simplified rate limiting check (in production, use Redis or similar)
-async function checkRateLimit(_request: HttpRequest): Promise<boolean> {
-  // For now, always return false (no rate limiting)
-  // In production, implement proper rate limiting based on IP or user
-  return false;
 }

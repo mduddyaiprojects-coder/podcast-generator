@@ -2,7 +2,6 @@ import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/fu
 import { ContentSubmissionService } from '../services/content-submission-service';
 import { ValidationMiddleware, CommonSchemas, withValidation } from '../utils/validation';
 import { ErrorHandler, withErrorHandling, ProcessingError, RateLimitError, ValidationError } from '../utils/error-handler';
-import { logger } from '../utils/logger';
 
 /**
  * POST /api/content
