@@ -91,14 +91,22 @@
 - [ ] T038 Test n8n workflow execution with sample content
 
 ## Phase 3.5: iOS Integration
-- [ ] T039 [P] iOS Share Sheet extension in ios/ShareExtension/ShareViewController.swift
-- [ ] T040 [P] iOS Share Sheet configuration in ios/ShareExtension/Info.plist
-- [ ] T041 [P] iOS Shortcuts integration in ios/Shortcuts/SendToPodcast.shortcut
-- [ ] T042 [P] iOS Share Sheet UI components in ios/ShareExtension/UI/
-- [ ] T043 [P] iOS Share Sheet networking in ios/ShareExtension/Networking/
-- [ ] T044 Configure iOS Share Sheet app groups and entitlements
-- [ ] T045 Test iOS Share Sheet with various content types
-- [ ] T046 Test iOS Shortcuts automation workflows
+- [x] T039 [P] iOS Share Sheet extension in ios/ShareExtension/ShareViewController.swift
+- [x] T040 [P] iOS Share Sheet configuration in ios/ShareExtension/Info.plist
+- [x] T041 [P] iOS Shortcuts integration in ios/Shortcuts/SendToPodcast.shortcut
+- [x] T042 [P] iOS Share Sheet UI components in ios/ShareExtension/UI/
+- [x] T043 [P] iOS Share Sheet networking in ios/ShareExtension/Networking/
+- [x] T044 Configure iOS Share Sheet app groups and entitlements
+- [x] T045 Test iOS Share Sheet with various content types
+- [x] T046 Test iOS Shortcuts automation workflows
+
+## Phase 3.5.1: iOS Build and Deployment
+- [ ] T091 Build iOS project in Xcode
+- [ ] T092 Configure code signing and provisioning profiles
+- [ ] T093 Test iOS Share Sheet on physical device
+- [ ] T094 Archive iOS app for distribution
+- [ ] T095 Deploy to TestFlight for beta testing
+- [ ] T096 Submit to App Store for review
 
 ## Phase 3.6: Database Integration
 - [ ] T047 Connect models to PostgreSQL database

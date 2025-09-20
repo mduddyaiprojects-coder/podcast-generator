@@ -6,7 +6,7 @@ import UniformTypeIdentifiers
 class ShareViewController: SLComposeServiceViewController {
     
     // MARK: - Properties
-    private let apiBaseURL = "https://your-azure-functions-app.azurewebsites.net/api"
+    private let apiBaseURL = "https://podcast-gen-api.azurewebsites.net/api"
     private let shareExtensionGroupID = "group.com.podcastgenerator.share"
     
     // MARK: - Lifecycle
@@ -103,20 +103,20 @@ class ShareViewController: SLComposeServiceViewController {
     // MARK: - Content Handlers
     private func handleURL(_ url: URL) {
         let content = ContentSubmission(
-            url: url.absoluteString,
+            content_url: url.absoluteString,
             title: extractTitle(from: url),
             description: textView.text,
-            contentType: .url
+            content_type: "url"
         )
         submitContent(content)
     }
     
     private func handleText(_ text: String) {
         let content = ContentSubmission(
-            url: nil,
+            content_url: "text://\(UUID().uuidString)",
             title: "Text Content",
             description: text,
-            contentType: .text
+            content_type: "document"
         )
         submitContent(content)
     }
@@ -135,10 +135,10 @@ class ShareViewController: SLComposeServiceViewController {
             }
             
             let content = ContentSubmission(
-                url: imageURL,
+                content_url: imageURL,
                 title: "Image Content",
                 description: self?.textView.text,
-                contentType: .image
+                content_type: "document"
             )
             self?.submitContent(content)
         }
@@ -146,20 +146,20 @@ class ShareViewController: SLComposeServiceViewController {
     
     private func handleImageURL(_ url: URL) {
         let content = ContentSubmission(
-            url: url.absoluteString,
+            content_url: url.absoluteString,
             title: "Image Content",
             description: textView.text,
-            contentType: .image
+            content_type: "document"
         )
         submitContent(content)
     }
     
     private func handleFile(_ url: URL) {
         let content = ContentSubmission(
-            url: url.absoluteString,
+            content_url: url.absoluteString,
             title: url.lastPathComponent,
             description: textView.text,
-            contentType: .file
+            content_type: "document"
         )
         submitContent(content)
     }
@@ -252,10 +252,10 @@ class ShareViewController: SLComposeServiceViewController {
 
 // MARK: - Content Models
 struct ContentSubmission: Codable {
-    let url: String?
+    let content_url: String?
     let title: String
     let description: String?
-    let contentType: ContentType
+    let content_type: String
 }
 
 enum ContentType: String, Codable {
