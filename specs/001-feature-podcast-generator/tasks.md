@@ -132,7 +132,7 @@
 - [x] T055 [P] Azure OpenAI integration in api/src/services/azure-openai-service.ts
 - [x] T056 [P] ElevenLabs API integration in api/src/services/elevenlabs-service.ts
 - [x] T057 [P] YouTube API integration in api/src/services/youtube-service.ts
-- [ ] T058 [P] Whisper API integration in api/src/services/whisper-service.ts
+- [x] T058 [P] Whisper API integration in api/src/services/whisper-service.ts
 - [ ] T059 Configure API keys and credentials securely
 - [ ] T060 Implement retry logic and error handling for all services
 - [ ] T061 Set up service monitoring and alerting
