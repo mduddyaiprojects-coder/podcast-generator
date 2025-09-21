@@ -129,7 +129,7 @@
 
 ## Phase 3.7: External Service Integration
 - [x] T054 [P] Firecrawl API integration in api/src/services/firecrawl-service.ts
-- [ ] T055 [P] Azure OpenAI integration in api/src/services/azure-openai-service.ts
+- [x] T055 [P] Azure OpenAI integration in api/src/services/azure-openai-service.ts
 - [ ] T056 [P] ElevenLabs API integration in api/src/services/elevenlabs-service.ts
 - [ ] T057 [P] YouTube API integration in api/src/services/youtube-service.ts
 - [ ] T058 [P] Whisper API integration in api/src/services/whisper-service.ts
