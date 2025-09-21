@@ -135,7 +135,7 @@
 - [x] T058 [P] Whisper API integration in api/src/services/whisper-service.ts
 - [x] T059 Configure API keys and credentials securely
 - [x] T060 Implement retry logic and error handling for all services
-- [ ] T061 Set up service monitoring and alerting
+- [DEFERRED] T061 Set up service monitoring and alerting (circuit breaker test issues - 36/39 tests passing)
 
 ## Phase 3.8: Storage and CDN
 - [ ] T062 [P] Azure Blob Storage integration in api/src/services/blob-storage-service.ts
