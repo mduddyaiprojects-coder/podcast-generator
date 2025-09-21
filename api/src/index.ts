@@ -17,6 +17,14 @@ import { testDbFunction } from './functions/test-db';
 import { dataRetentionCleanupTimer, dataRetentionHttp } from './functions/data-retention-cleanup';
 import { databaseMonitoringFunction } from './functions/database-monitoring';
 import { securityHealthFunction, securityAlertsFunction, securityMetricsFunction, securityValidateFunction } from './functions/security-health';
+import { 
+  monitoringHealthFunction, 
+  monitoringMetricsFunction, 
+  monitoringAlertsFunction, 
+  monitoringResolveAlertFunction, 
+  monitoringServicesFunction, 
+  monitoringHealthCheckFunction 
+} from './functions/monitoring-dashboard';
 
 // Register all functions with the Azure Functions runtime
 
@@ -149,4 +157,47 @@ app.http('security-validate', {
   authLevel: 'anonymous',
   route: 'security/validate',
   handler: securityValidateFunction
+});
+
+// Monitoring and alerting endpoints (T061)
+app.http('monitoring-health', {
+  methods: ['GET'],
+  authLevel: 'anonymous',
+  route: 'monitoring/health',
+  handler: monitoringHealthFunction
+});
+
+app.http('monitoring-metrics', {
+  methods: ['GET'],
+  authLevel: 'anonymous',
+  route: 'monitoring/metrics',
+  handler: monitoringMetricsFunction
+});
+
+app.http('monitoring-alerts', {
+  methods: ['GET'],
+  authLevel: 'anonymous',
+  route: 'monitoring/alerts',
+  handler: monitoringAlertsFunction
+});
+
+app.http('monitoring-resolve-alert', {
+  methods: ['POST'],
+  authLevel: 'anonymous',
+  route: 'monitoring/alerts/resolve',
+  handler: monitoringResolveAlertFunction
+});
+
+app.http('monitoring-services', {
+  methods: ['GET'],
+  authLevel: 'anonymous',
+  route: 'monitoring/services',
+  handler: monitoringServicesFunction
+});
+
+app.http('monitoring-health-check', {
+  methods: ['POST'],
+  authLevel: 'anonymous',
+  route: 'monitoring/health-check',
+  handler: monitoringHealthCheckFunction
 });

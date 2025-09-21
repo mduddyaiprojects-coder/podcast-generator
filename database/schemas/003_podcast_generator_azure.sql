@@ -248,3 +248,4 @@ COMMENT ON COLUMN processing_jobs.retry_count IS 'Number of retry attempts';
 COMMENT ON COLUMN processing_jobs.max_retries IS 'Maximum retry attempts';
 
 
+

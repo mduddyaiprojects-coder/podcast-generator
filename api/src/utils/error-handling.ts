@@ -281,10 +281,10 @@ export class ErrorHandler {
     // Check common retryable error patterns
     const retryablePatterns = [
       'timeout',
-      'ECONNRESET',
-      'ENOTFOUND',
-      'ECONNREFUSED',
-      'ETIMEDOUT',
+      'econnreset',
+      'enotfound',
+      'econnrefused',
+      'etimedout',
       'rate limit',
       'service unavailable',
       'temporary'

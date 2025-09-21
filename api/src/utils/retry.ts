@@ -131,7 +131,10 @@ export class RetryUtil {
     }
 
     const totalTimeMs = Date.now() - startTime;
-    throw { ...lastError, attempts, totalTimeMs };
+    const enhancedError = new Error(lastError.message || 'Operation failed') as any;
+    enhancedError.attempts = attempts;
+    enhancedError.totalTimeMs = totalTimeMs;
+    throw enhancedError;
   }
 
   /**

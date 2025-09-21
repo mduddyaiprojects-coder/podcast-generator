@@ -70,6 +70,7 @@ describe('CircuitBreaker', () => {
       
       const operation = jest.fn().mockResolvedValue('success');
       
+      // The circuit breaker should move to HALF_OPEN when a new request is made after timeout
       const result = await circuitBreaker.execute(operation);
       
       expect(result).toBe('success');
@@ -82,7 +83,9 @@ describe('CircuitBreaker', () => {
       // Open the circuit
       const failingOperation = jest.fn().mockRejectedValue(new Error('Service error'));
       
-      for (let i = 0; i < DEFAULT_CIRCUIT_BREAKER_CONFIG.failureThreshold + 1; i++) {
+      const totalAttempts = Math.max(DEFAULT_CIRCUIT_BREAKER_CONFIG.failureThreshold + 1, DEFAULT_CIRCUIT_BREAKER_CONFIG.minRequestCount + 1);
+      
+      for (let i = 0; i < totalAttempts; i++) {
         try {
           await circuitBreaker.execute(failingOperation);
         } catch (error) {
