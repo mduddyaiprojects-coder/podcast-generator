@@ -11,10 +11,12 @@ import { episodesListFunction } from './functions/episodes-list';
 import { healthCheckFunction } from './functions/health-check';
 import { ttsGenerationFunction } from './functions/tts-generation';
 import { youtubeExtractionFunction } from './functions/youtube-extraction';
+import { whisperTranscriptionFunction } from './functions/whisper-transcription';
 import { webhookShareFunction } from './functions/webhook-share';
 import { testDbFunction } from './functions/test-db';
 import { dataRetentionCleanupTimer, dataRetentionHttp } from './functions/data-retention-cleanup';
 import { databaseMonitoringFunction } from './functions/database-monitoring';
+import { securityHealthFunction, securityAlertsFunction, securityMetricsFunction, securityValidateFunction } from './functions/security-health';
 
 // Register all functions with the Azure Functions runtime
 
@@ -74,6 +76,14 @@ app.http('youtube-extraction', {
     handler: youtubeExtractionFunction
 });
 
+// Whisper transcription endpoint (T058)
+app.http('whisper-transcription', {
+    methods: ['POST'],
+    authLevel: 'anonymous',
+    route: 'whisper-transcribe',
+    handler: whisperTranscriptionFunction
+});
+
 // Webhook share endpoint (T097) - for iOS Shortcuts integration
 app.http('webhook-share', {
   methods: ['POST'],
@@ -110,4 +120,33 @@ app.http('database-monitoring', {
   authLevel: 'anonymous',
   route: 'database-monitoring/{action?}',
   handler: databaseMonitoringFunction
+});
+
+// Security monitoring endpoints (T059)
+app.http('security-health', {
+  methods: ['GET'],
+  authLevel: 'anonymous',
+  route: 'security/health',
+  handler: securityHealthFunction
+});
+
+app.http('security-alerts', {
+  methods: ['GET'],
+  authLevel: 'anonymous',
+  route: 'security/alerts',
+  handler: securityAlertsFunction
+});
+
+app.http('security-metrics', {
+  methods: ['GET'],
+  authLevel: 'anonymous',
+  route: 'security/metrics',
+  handler: securityMetricsFunction
+});
+
+app.http('security-validate', {
+  methods: ['POST'],
+  authLevel: 'anonymous',
+  route: 'security/validate',
+  handler: securityValidateFunction
 });
