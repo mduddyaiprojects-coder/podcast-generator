@@ -12,6 +12,9 @@ import { healthCheckFunction } from './functions/health-check';
 import { ttsGenerationFunction } from './functions/tts-generation';
 import { youtubeExtractionFunction } from './functions/youtube-extraction';
 import { webhookShareFunction } from './functions/webhook-share';
+import { testDbFunction } from './functions/test-db';
+import { dataRetentionCleanupTimer, dataRetentionHttp } from './functions/data-retention-cleanup';
+import { databaseMonitoringFunction } from './functions/database-monitoring';
 
 // Register all functions with the Azure Functions runtime
 
@@ -73,8 +76,38 @@ app.http('youtube-extraction', {
 
 // Webhook share endpoint (T097) - for iOS Shortcuts integration
 app.http('webhook-share', {
-    methods: ['POST'],
-    authLevel: 'anonymous',
-    route: 'webhook/share',
-    handler: webhookShareFunction
+  methods: ['POST'],
+  authLevel: 'anonymous',
+  route: 'webhook/share',
+  handler: webhookShareFunction
+});
+
+// Database test endpoint - for testing database connection
+app.http('test-db', {
+  methods: ['GET'],
+  authLevel: 'anonymous',
+  route: 'test-db',
+  handler: testDbFunction
+});
+
+// Data retention cleanup - timer triggered (daily at 2 AM UTC)
+app.timer('data-retention-cleanup', {
+  schedule: '0 0 2 * * *', // Daily at 2 AM UTC
+  handler: dataRetentionCleanupTimer
+});
+
+// Data retention HTTP endpoints - for manual cleanup and monitoring
+app.http('data-retention-http', {
+  methods: ['GET', 'POST'],
+  authLevel: 'anonymous',
+  route: 'data-retention/{action?}',
+  handler: dataRetentionHttp
+});
+
+// Database monitoring endpoints - for health, alerts, performance, and backups
+app.http('database-monitoring', {
+  methods: ['GET', 'POST'],
+  authLevel: 'anonymous',
+  route: 'database-monitoring/{action?}',
+  handler: databaseMonitoringFunction
 });

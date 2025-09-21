@@ -112,7 +112,7 @@ n8n-workflows/
 ├── youtube-extraction.json
 └── document-processing.json
 
-ios/
+# ios/ - REMOVED (moved to webhook approach)
 ├── ShareExtension/
 │   ├── ShareViewController.swift
 │   └── Info.plist

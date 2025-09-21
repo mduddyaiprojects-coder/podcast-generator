@@ -1,4 +1,5 @@
 # Tasks: Podcast Generator
+ 
 
 **Input**: Design documents from `/specs/001-feature-podcast-generator/`
 **Prerequisites**: plan.md (required), research.md, data-model.md, contracts/
@@ -37,7 +38,7 @@
 - Include exact file paths in descriptions
 
 ## Path Conventions
-- **Web app**: `api/src/`, `n8n-workflows/`, `ios/`
+- **Web app**: `api/src/`, `n8n-workflows/`
 - Paths shown below assume web application structure
 
 ## Phase 3.1: Setup
@@ -91,31 +92,40 @@
 - [ ] T038 Test n8n workflow execution with sample content
 
 ## Phase 3.5: iOS Integration
-- [x] T039 [P] iOS Share Sheet extension in ios/ShareExtension/ShareViewController.swift
-- [x] T040 [P] iOS Share Sheet configuration in ios/ShareExtension/Info.plist
-- [x] T041 [P] iOS Shortcuts integration in ios/Shortcuts/SendToPodcast.shortcut
-- [x] T042 [P] iOS Share Sheet UI components in ios/ShareExtension/UI/
-- [x] T043 [P] iOS Share Sheet networking in ios/ShareExtension/Networking/
+- [x] T039 [P] iOS Share Sheet extension - **CANCELLED** (moved to webhook approach)
+- [x] T040 [P] iOS Share Sheet configuration - **CANCELLED** (moved to webhook approach)
+- [x] T041 [P] iOS Shortcuts integration - **CANCELLED** (moved to webhook approach)
+- [x] T042 [P] iOS Share Sheet UI components - **CANCELLED** (moved to webhook approach)
+- [x] T043 [P] iOS Share Sheet networking - **CANCELLED** (moved to webhook approach)
 - [x] T044 Configure iOS Share Sheet app groups and entitlements
 - [x] T045 Test iOS Share Sheet with various content types
 - [x] T046 Test iOS Shortcuts automation workflows
 
-## Phase 3.5.1: iOS Build and Deployment
-- [ ] T091 Build iOS project in Xcode
-- [ ] T092 Configure code signing and provisioning profiles
-- [ ] T093 Test iOS Share Sheet on physical device
-- [ ] T094 Archive iOS app for distribution
-- [ ] T095 Deploy to TestFlight for beta testing
-- [ ] T096 Submit to App Store for review
+## Phase 3.5.1: iOS Native Development (CANCELLED)
+- [x] T091 Build iOS project in Xcode
+- [x] T092 Configure code signing and provisioning profiles
+- [cancelled] T093 Test iOS Share Sheet on physical device
+- [cancelled] T094 Archive iOS app for distribution
+- [cancelled] T095 Deploy to TestFlight for beta testing
+- [cancelled] T096 Submit to App Store for review
+
+**Note:** Phase 3.5.1 cancelled in favor of webhook-based approach (Phase 3.5.2)
+
+## Phase 3.5.2: iOS Shortcuts + Webhook Integration
+- [x] T097 Create webhook endpoint for iOS Shortcuts integration
+- [x] T098 Create iOS Shortcuts configuration guide
+- [x] T099 Test webhook with iOS Shortcuts
+- [x] T100 Ensure RSS feed updates with webhook submissions
+- [x] T101 Remove iOS artifacts and clean up project structure
 
 ## Phase 3.6: Database Integration
-- [ ] T047 Connect models to PostgreSQL database
-- [ ] T048 Implement database migrations for all entities
-- [ ] T049 Set up database connection pooling for Azure Functions
-- [ ] T050 Configure database indexes for performance
-- [ ] T051 Implement data retention policies (90-day cleanup)
-- [ ] T052 Set up database monitoring and backup
-- [ ] T053 Test database operations under load
+- [x] T047 Connect models to PostgreSQL database
+- [x] T048 Implement database migrations for all entities
+- [x] T049 Set up database connection pooling for Azure Functions
+- [x] T050 Configure database indexes for performance
+- [x] T051 Implement data retention policies (90-day cleanup)
+- [x] T052 Set up database monitoring and backup
+- [cancelled] T053 Test database operations under load - **CANCELLED** (single-user system, load testing unnecessary)
 
 ## Phase 3.7: External Service Integration
 - [ ] T054 [P] Firecrawl API integration in api/src/services/firecrawl-service.ts

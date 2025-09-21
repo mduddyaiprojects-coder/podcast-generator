@@ -1,5 +1,7 @@
 import { HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
 import { ErrorHandler } from '../utils/error-handler';
+import { DatabaseService } from '../services/database-service';
+import { ContentSubmission } from '../models/content-submission';
 
 /**
  * POST /api/webhook/share
@@ -29,7 +31,7 @@ export async function webhookShareFunction(
       content?: string;
       type?: string;
     };
-    const { url, title, type } = body;
+        let { url, title, type } = body;
 
     // Validate required fields
     if (!url) {
@@ -43,9 +45,37 @@ export async function webhookShareFunction(
       };
     }
 
+    // Clean and validate URL format
+    let cleanUrl = url.trim();
+    
+    // Basic URL cleaning - remove common artifacts
+    cleanUrl = cleanUrl.replace(/SpeckitSpeckit/g, '');
+    cleanUrl = cleanUrl.replace(/Speckit/g, '');
+    
+    // Extract the first valid URL if multiple are concatenated
+    // Look for the first complete URL pattern
+    const urlMatches = cleanUrl.match(/https?:\/\/[^\s]+/g);
+    if (urlMatches && urlMatches.length > 0) {
+      // Take the first complete URL
+      cleanUrl = urlMatches[0];
+    }
+    
+    // Additional cleaning for concatenated URLs
+    // If we have something like "https://examplehttps://realurl.com"
+    // Extract the real URL part by finding the second https://
+    const doubleUrlMatch = cleanUrl.match(/https?:\/\/[^h]*https?:\/\/(.+)/);
+    if (doubleUrlMatch) {
+      cleanUrl = 'https://' + doubleUrlMatch[1];
+    }
+    
     // Validate URL format
     try {
-      new URL(url);
+      const parsedUrl = new URL(cleanUrl);
+      // Additional validation - must have proper protocol and hostname
+      if (!parsedUrl.protocol.startsWith('http') || !parsedUrl.hostname.includes('.')) {
+        throw new Error('Invalid URL format');
+      }
+      url = cleanUrl; // Use the cleaned URL
     } catch (urlError) {
       context.log('URL validation error:', urlError);
       return {
@@ -53,7 +83,9 @@ export async function webhookShareFunction(
         jsonBody: {
           error: 'INVALID_URL',
           message: 'Invalid URL format',
-          details: 'The provided URL is not valid'
+          details: 'The provided URL is not valid or could not be cleaned',
+          original_url: url,
+          cleaned_url: cleanUrl
         }
       };
     }
@@ -68,34 +100,47 @@ export async function webhookShareFunction(
       contentType = 'reddit';
     }
 
-    // For now, generate a submission ID and return success
-    // TODO: Connect to actual content processing pipeline when database is ready
-    const submissionId = `webhook_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const estimatedCompletion = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+        // Create content submission and save to database
+        const submission = new ContentSubmission({
+          content_url: url,
+          content_type: contentType as any,
+          user_note: title ? `Shared: ${title}` : undefined,
+          status: 'pending'
+        });
 
-    // Generate RSS feed URL (using the submission ID as feed slug)
-    const rssFeedUrl = `https://podcast-gen-api.azurewebsites.net/api/feeds/${submissionId}/rss.xml`;
+        const db = new DatabaseService();
+        await db.connect();
+        
+        try {
+          const submissionId = await db.saveSubmission(submission);
+          const estimatedCompletion = new Date(Date.now() + 15 * 60 * 1000).toISOString();
 
-    context.log('Webhook processed successfully (placeholder):', { 
-      submissionId, 
-      url, 
-      contentType, 
-      title 
-    });
+          // Generate RSS feed URL (using the submission ID as feed slug)
+          const rssFeedUrl = `https://podcast-gen-api.azurewebsites.net/api/feeds/${submissionId}/rss.xml`;
 
-    // Return success response optimized for iOS Shortcuts
-    return {
-      status: 200,
-      jsonBody: {
-        success: true,
-        submission_id: submissionId,
-        message: 'Content added to your podcast feed (processing will be enabled soon)',
-        rss_feed_url: rssFeedUrl,
-        estimated_completion: estimatedCompletion,
-        content_type: contentType,
-        title: title || 'Shared Content'
-      }
-    };
+          context.log('Webhook processed successfully:', {
+            submissionId,
+            url,
+            contentType,
+            title
+          });
+
+          // Return success response optimized for iOS Shortcuts
+          return {
+            status: 200,
+            jsonBody: {
+              success: true,
+              submission_id: submissionId,
+              message: 'Content added to your podcast feed successfully!',
+              rss_feed_url: rssFeedUrl,
+              estimated_completion: estimatedCompletion,
+              content_type: contentType,
+              title: title || 'Shared Content'
+            }
+          };
+        } finally {
+          await db.disconnect();
+        }
 
   } catch (error) {
     context.log('Webhook share error:', error);

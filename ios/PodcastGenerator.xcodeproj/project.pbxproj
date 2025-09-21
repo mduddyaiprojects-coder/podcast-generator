@@ -7,22 +7,20 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A1234567890ABCDEF1234567 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890ABCDEF1234566 /* ShareViewController.swift */; };
-		A1234567890ABCDEF1234568 /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A1234567890ABCDEF1234569 /* MainInterface.storyboard */; };
-		A1234567890ABCDEF123456A /* ShareExtension.entitlements in Resources */ = {isa = PBXBuildFile; fileRef = A1234567890ABCDEF123456B /* ShareExtension.entitlements */; };
+		F1234567890ABCDEF1234567 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1234567890ABCDEF1234566 /* ShareViewController.swift */; };
+		F1234567890ABCDEF123456A /* ShareExtension.entitlements in Resources */ = {isa = PBXBuildFile; fileRef = F1234567890ABCDEF123456B /* ShareExtension.entitlements */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		A1234567890ABCDEF1234565 /* ShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		A1234567890ABCDEF1234566 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
-		A1234567890ABCDEF1234569 /* MainInterface.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = MainInterface.storyboard; sourceTree = "<group>"; };
-		A1234567890ABCDEF123456B /* ShareExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ShareExtension.entitlements; sourceTree = "<group>"; };
-		A1234567890ABCDEF123456C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		A1234567890ABCDEF123456D /* ShareExtension.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = ShareExtension.xcconfig; sourceTree = "<group>"; };
+		F1234567890ABCDEF1234565 /* ShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		F1234567890ABCDEF1234566 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
+		F1234567890ABCDEF123456B /* ShareExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ShareExtension.entitlements; sourceTree = "<group>"; };
+		F1234567890ABCDEF123456C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F1234567890ABCDEF123456D /* ShareExtension.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = ShareExtension.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		A1234567890ABCDEF1234562 /* Frameworks */ = {
+		F1234567890ABCDEF1234562 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -32,30 +30,29 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		A1234567890ABCDEF1234560 = {
+		F1234567890ABCDEF1234560 = {
 			isa = PBXGroup;
 			children = (
-				A1234567890ABCDEF123456E /* ShareExtension */,
-				A1234567890ABCDEF123456F /* Products */,
+				F1234567890ABCDEF123456E /* ShareExtension */,
+				F1234567890ABCDEF123456F /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		A1234567890ABCDEF123456E /* ShareExtension */ = {
+		F1234567890ABCDEF123456E /* ShareExtension */ = {
 			isa = PBXGroup;
 			children = (
-				A1234567890ABCDEF1234566 /* ShareViewController.swift */,
-				A1234567890ABCDEF1234569 /* MainInterface.storyboard */,
-				A1234567890ABCDEF123456B /* ShareExtension.entitlements */,
-				A1234567890ABCDEF123456C /* Info.plist */,
-				A1234567890ABCDEF123456D /* ShareExtension.xcconfig */,
+				F1234567890ABCDEF1234566 /* ShareViewController.swift */,
+				F1234567890ABCDEF123456B /* ShareExtension.entitlements */,
+				F1234567890ABCDEF123456C /* Info.plist */,
+				F1234567890ABCDEF123456D /* ShareExtension.xcconfig */,
 			);
 			path = ShareExtension;
 			sourceTree = "<group>";
 		};
-		A1234567890ABCDEF123456F /* Products */ = {
+		F1234567890ABCDEF123456F /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A1234567890ABCDEF1234565 /* ShareExtension.appex */,
+				F1234567890ABCDEF1234565 /* ShareExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -63,13 +60,13 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		A1234567890ABCDEF1234564 /* ShareExtension */ = {
+		F1234567890ABCDEF1234564 /* ShareExtension */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A1234567890ABCDEF1234570 /* Build configuration list for PBXNativeTarget "ShareExtension" */;
+			buildConfigurationList = F1234567890ABCDEF1234570 /* Build configuration list for PBXNativeTarget "ShareExtension" */;
 			buildPhases = (
-				A1234567890ABCDEF1234561 /* Sources */,
-				A1234567890ABCDEF1234562 /* Frameworks */,
-				A1234567890ABCDEF1234563 /* Resources */,
+				F1234567890ABCDEF1234561 /* Sources */,
+				F1234567890ABCDEF1234562 /* Frameworks */,
+				F1234567890ABCDEF1234563 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -77,25 +74,25 @@
 			);
 			name = ShareExtension;
 			productName = ShareExtension;
-			productReference = A1234567890ABCDEF1234565 /* ShareExtension.appex */;
+			productReference = F1234567890ABCDEF1234565 /* ShareExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		A1234567890ABCDEF123455F /* Project object */ = {
+		F1234567890ABCDEF123455F /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1500;
 				LastUpgradeCheck = 1500;
 				TargetAttributes = {
-					A1234567890ABCDEF1234564 = {
+					F1234567890ABCDEF1234564 = {
 						CreatedOnToolsVersion = 15.0;
 					};
 				};
 			};
-			buildConfigurationList = A1234567890ABCDEF1234562 /* Build configuration list for PBXProject "PodcastGenerator" */;
+			buildConfigurationList = F1234567890ABCDEF1234571 /* Build configuration list for PBXProject "PodcastGenerator" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -103,43 +100,42 @@
 				en,
 				Base,
 			);
-			mainGroup = A1234567890ABCDEF1234560;
-			productRefGroup = A1234567890ABCDEF123456F /* Products */;
+			mainGroup = F1234567890ABCDEF1234560;
+			productRefGroup = F1234567890ABCDEF123456F /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				A1234567890ABCDEF1234564 /* ShareExtension */,
+				F1234567890ABCDEF1234564 /* ShareExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		A1234567890ABCDEF1234563 /* Resources */ = {
+		F1234567890ABCDEF1234563 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A1234567890ABCDEF1234568 /* MainInterface.storyboard in Resources */,
-				A1234567890ABCDEF123456A /* ShareExtension.entitlements in Resources */,
+				F1234567890ABCDEF123456A /* ShareExtension.entitlements in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		A1234567890ABCDEF1234561 /* Sources */ = {
+		F1234567890ABCDEF1234561 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A1234567890ABCDEF1234567 /* ShareViewController.swift in Sources */,
+				F1234567890ABCDEF1234567 /* ShareViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		A1234567890ABCDEF1234571 /* Debug */ = {
+		F1234567890ABCDEF1234572 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A1234567890ABCDEF123456D /* ShareExtension.xcconfig */;
+			baseConfigurationReference = F1234567890ABCDEF123456D /* ShareExtension.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -198,9 +194,9 @@
 			};
 			name = Debug;
 		};
-		A1234567890ABCDEF1234572 /* Release */ = {
+		F1234567890ABCDEF1234573 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A1234567890ABCDEF123456D /* ShareExtension.xcconfig */;
+			baseConfigurationReference = F1234567890ABCDEF123456D /* ShareExtension.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -253,11 +249,12 @@
 			};
 			name = Release;
 		};
-		A1234567890ABCDEF1234573 /* Debug */ = {
+		F1234567890ABCDEF1234574 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A1234567890ABCDEF123456D /* ShareExtension.xcconfig */;
+			baseConfigurationReference = F1234567890ABCDEF123456D /* ShareExtension.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = VQLVHSUD6Q;
 				INFOPLIST_FILE = ShareExtension/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -272,11 +269,12 @@
 			};
 			name = Debug;
 		};
-		A1234567890ABCDEF1234574 /* Release */ = {
+		F1234567890ABCDEF1234575 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A1234567890ABCDEF123456D /* ShareExtension.xcconfig */;
+			baseConfigurationReference = F1234567890ABCDEF123456D /* ShareExtension.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = VQLVHSUD6Q;
 				INFOPLIST_FILE = ShareExtension/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -294,26 +292,25 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		A1234567890ABCDEF1234562 /* Build configuration list for PBXProject "PodcastGenerator" */ = {
+		F1234567890ABCDEF1234570 /* Build configuration list for PBXNativeTarget "ShareExtension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				A1234567890ABCDEF1234571 /* Debug */,
-				A1234567890ABCDEF1234572 /* Release */,
+				F1234567890ABCDEF1234574 /* Debug */,
+				F1234567890ABCDEF1234575 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A1234567890ABCDEF1234570 /* Build configuration list for PBXNativeTarget "ShareExtension" */ = {
+		F1234567890ABCDEF1234571 /* Build configuration list for PBXProject "PodcastGenerator" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				A1234567890ABCDEF1234573 /* Debug */,
-				A1234567890ABCDEF1234574 /* Release */,
+				F1234567890ABCDEF1234572 /* Debug */,
+				F1234567890ABCDEF1234573 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = A1234567890ABCDEF123455F /* Project object */;
+	rootObject = F1234567890ABCDEF123455F /* Project object */;
 }
-

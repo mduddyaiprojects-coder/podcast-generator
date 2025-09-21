@@ -12,7 +12,7 @@ TARGETED_DEVICE_FAMILY = 1,2
 
 // Code Signing
 CODE_SIGN_STYLE = Automatic
-DEVELOPMENT_TEAM = YOUR_TEAM_ID
+DEVELOPMENT_TEAM = VQLVHSUD6Q
 
 // App Groups
 CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements

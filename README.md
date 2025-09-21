@@ -4,13 +4,20 @@ Convert any web content (URLs, YouTube videos, documents) into podcast episodes 
 
 ## 🚀 Quick Start
 
-1. **Share Content**: Use iOS Share Sheet to send any URL, YouTube video, or document
+### Option 1: iOS Shortcuts (Recommended)
+1. **Set up iOS Shortcuts**: Follow our [iOS Shortcuts Setup Guide](docs/ios-shortcuts-quickstart.md)
+2. **Share Content**: Use the "Send to Podcast Generator" shortcut from any app
+3. **Listen**: Subscribe to your personal RSS feed in Apple Podcasts, Overcast, or Spotify
+
+### Option 2: Direct API
+1. **Send Content**: POST to `/api/webhook/share` with your content
 2. **AI Processing**: Content is automatically converted to engaging podcast dialogue
 3. **Listen**: Subscribe to your personal RSS feed in Apple Podcasts, Overcast, or Spotify
 
 ## ✨ Features
 
-- **iOS Share Sheet Integration**: One-tap sharing from any app
+- **iOS Shortcuts Integration**: One-tap sharing from any app via Shortcuts
+- **Webhook API**: Direct integration for developers and power users
 - **Multi-Content Support**: URLs, YouTube videos, PDFs, documents
 - **AI-Powered**: Azure OpenAI converts content to conversational dialogue
 - **High-Quality Audio**: ElevenLabs TTS with Azure fallback

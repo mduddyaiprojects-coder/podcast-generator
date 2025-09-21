@@ -1,0 +1,20 @@
+{
+  "azureFunctions.deploySubpath": "api",
+  "azureFunctions.projectLanguage": "TypeScript",
+  "azureFunctions.projectRuntime": "~4",
+  "azureFunctions.templateFilter": "All",
+  "azureFunctions.validateFuncName": true,
+  "azureFunctions.pythonVenv": "~/.virtualenvs/azure-functions",
+  "azureFunctions.pythonVenvPath": "~/.virtualenvs/azure-functions",
+  "azureFunctions.extensionBundle": {
+    "id": "Microsoft.Azure.Functions.ExtensionBundle",
+    "version": "[4.*, 5.0.0)"
+  },
+  "azureFunctions.runtime": "node",
+  "azureFunctions.nodeVersion": "22",
+  "azureFunctions.workerRuntime": "node",
+  "azureFunctions.extensionVersion": "~4",
+  "typescript.preferences.includePackageJsonAutoImports": "auto",
+  "typescript.suggest.autoImports": true,
+  "typescript.updateImportsOnFileMove.enabled": "always"
+}
