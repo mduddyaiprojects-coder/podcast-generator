@@ -27,6 +27,7 @@
     "@azure/identity": "^4.12.0",
     "@azure/openai": "^2.0.0",
     "@azure/storage-blob": "^12.28.0",
+    "@mendable/firecrawl-js": "^1.4.3",
     "@types/pg": "^8.15.5",
     "axios": "^1.12.2",
     "cors": "^2.8.5",

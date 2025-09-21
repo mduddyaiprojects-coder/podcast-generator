@@ -128,7 +128,7 @@
 - [cancelled] T053 Test database operations under load - **CANCELLED** (single-user system, load testing unnecessary)
 
 ## Phase 3.7: External Service Integration
-- [ ] T054 [P] Firecrawl API integration in api/src/services/firecrawl-service.ts
+- [x] T054 [P] Firecrawl API integration in api/src/services/firecrawl-service.ts
 - [ ] T055 [P] Azure OpenAI integration in api/src/services/azure-openai-service.ts
 - [ ] T056 [P] ElevenLabs API integration in api/src/services/elevenlabs-service.ts
 - [ ] T057 [P] YouTube API integration in api/src/services/youtube-service.ts
