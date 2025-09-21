@@ -1,4 +1,5 @@
 import { HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
+import { YouTubeService } from '../services/youtube-service';
 
 /**
  * POST /api/youtube-extract
@@ -52,17 +53,31 @@ export async function youtubeExtractionFunction(
       content_type 
     });
 
-    // TODO: Implement actual YouTube Data API integration
-    // For now, return mock data
-    context.log('YouTube Data API integration not implemented, using mock data');
+    // Debug environment variables
+    context.log('Environment variables debug:');
+    context.log('YOUTUBE_API_KEY:', process.env['YOUTUBE_API_KEY'] ? 'SET' : 'NOT SET');
+    context.log('All env vars with YOUTUBE:', Object.keys(process.env).filter(key => key.includes('YOUTUBE')));
     
-    const mockMetadata = generateMockYouTubeMetadata(extractedVideoId!, youtube_url || undefined, content_type);
+    // Use YouTube service to get real metadata
+    context.log('Creating YouTube service...');
+    const youtubeService = new YouTubeService();
+    
+    context.log('Checking YouTube service health...');
+    const isHealthy = await youtubeService.checkHealth();
+    context.log(`YouTube service health: ${isHealthy}`);
+    
+    if (!isHealthy) {
+      throw new Error('YouTube service is not healthy');
+    }
+    
+    context.log('Fetching video metadata...');
+    const metadata = await youtubeService.getVideoMetadata(extractedVideoId!);
 
     context.log('YouTube extraction completed:', {
       video_id: extractedVideoId,
-      title: mockMetadata.title,
-      duration: mockMetadata.duration,
-      view_count: mockMetadata.view_count
+      title: metadata.title,
+      duration: metadata.duration,
+      view_count: metadata.viewCount
     });
 
     return {
@@ -72,18 +87,18 @@ export async function youtubeExtractionFunction(
         message: 'YouTube metadata extracted successfully',
         video_id: extractedVideoId,
         youtube_url: youtube_url,
-        title: mockMetadata.title,
-        description: mockMetadata.description,
-        channel_title: mockMetadata.channel_title,
-        channel_id: mockMetadata.channel_id,
-        published_at: mockMetadata.published_at,
-        duration: mockMetadata.duration,
-        view_count: mockMetadata.view_count,
-        like_count: mockMetadata.like_count,
-        comment_count: mockMetadata.comment_count,
-        thumbnail_url: mockMetadata.thumbnail_url,
-        tags: mockMetadata.tags,
-        category_id: mockMetadata.category_id,
+        title: metadata.title,
+        description: metadata.description,
+        channel_title: metadata.channelTitle,
+        channel_id: metadata.channelId,
+        published_at: metadata.publishedAt,
+        duration: metadata.duration,
+        view_count: metadata.viewCount,
+        like_count: metadata.likeCount,
+        comment_count: metadata.commentCount,
+        thumbnail_url: metadata.thumbnailUrl,
+        tags: metadata.tags,
+        category_id: metadata.categoryId,
         content_type: content_type || 'youtube_video',
         extracted_at: new Date().toISOString()
       }
@@ -109,45 +124,4 @@ function extractVideoIdFromUrl(url: string): string | undefined {
   const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
   const match = url.match(youtubeRegex);
   return match ? match[1] : undefined;
-}
-
-/**
- * Generate mock YouTube metadata for testing
- */
-function generateMockYouTubeMetadata(videoId: string, youtubeUrl?: string | null, contentType?: string) {
-  const now = new Date();
-  const publishedAt = new Date(now.getTime() - Math.random() * 365 * 24 * 60 * 60 * 1000); // Random date within last year
-  
-  return {
-    video_id: videoId,
-    youtube_url: youtubeUrl || `https://www.youtube.com/watch?v=${videoId}`,
-    title: `Sample YouTube Video ${videoId.substring(0, 6)}`,
-    description: 'This is a sample YouTube video description for testing purposes. It contains some example text to demonstrate the metadata extraction functionality.',
-    channel_title: 'Sample Channel',
-    channel_id: 'UC' + Math.random().toString(36).substr(2, 22),
-    published_at: publishedAt.toISOString(),
-    duration: formatDuration(Math.floor(Math.random() * 3600) + 60), // 1-60 minutes
-    view_count: Math.floor(Math.random() * 1000000) + 1000,
-    like_count: Math.floor(Math.random() * 10000) + 100,
-    comment_count: Math.floor(Math.random() * 1000) + 10,
-    thumbnail_url: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
-    tags: ['sample', 'test', 'youtube', 'video', 'metadata'],
-    category_id: '22', // People & Blogs
-    content_type: contentType || 'youtube_video'
-  };
-}
-
-/**
- * Format duration from seconds to HH:MM:SS or MM:SS
- */
-function formatDuration(seconds: number): string {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const secs = seconds % 60;
-  
-  if (hours > 0) {
-    return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  } else {
-    return `${minutes}:${secs.toString().padStart(2, '0')}`;
-  }
 }
