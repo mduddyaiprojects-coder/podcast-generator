@@ -53,24 +53,8 @@ export async function youtubeExtractionFunction(
       content_type 
     });
 
-    // Debug environment variables
-    context.log('Environment variables debug:');
-    context.log('YOUTUBE_API_KEY:', process.env['YOUTUBE_API_KEY'] ? 'SET' : 'NOT SET');
-    context.log('All env vars with YOUTUBE:', Object.keys(process.env).filter(key => key.includes('YOUTUBE')));
-    
     // Use YouTube service to get real metadata
-    context.log('Creating YouTube service...');
     const youtubeService = new YouTubeService();
-    
-    context.log('Checking YouTube service health...');
-    const isHealthy = await youtubeService.checkHealth();
-    context.log(`YouTube service health: ${isHealthy}`);
-    
-    if (!isHealthy) {
-      throw new Error('YouTube service is not healthy');
-    }
-    
-    context.log('Fetching video metadata...');
     const metadata = await youtubeService.getVideoMetadata(extractedVideoId!);
 
     context.log('YouTube extraction completed:', {
