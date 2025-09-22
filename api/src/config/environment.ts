@@ -34,6 +34,11 @@ export interface EnvironmentConfig {
     azureStorageConnectionString?: string;
     containerName: string;
     cdnBaseUrl?: string;
+    blobStorage: {
+      accountName: string;
+      connectionString?: string;
+      useManagedIdentity: boolean;
+    };
   };
   database: {
     url?: string;
@@ -108,7 +113,12 @@ export class EnvironmentService {
       storage: {
         azureStorageConnectionString: process.env['AZURE_STORAGE_CONNECTION_STRING'],
         containerName: process.env['AZURE_STORAGE_CONTAINER_NAME'] || 'podcast-content',
-        cdnBaseUrl: process.env['CDN_BASE_URL']
+        cdnBaseUrl: process.env['CDN_BASE_URL'],
+        blobStorage: {
+          accountName: process.env['AZURE_BLOB_STORAGE_ACCOUNT_NAME'] || '',
+          connectionString: process.env['AZURE_BLOB_STORAGE_CONNECTION_STRING'],
+          useManagedIdentity: this.getBooleanEnv('AZURE_BLOB_STORAGE_USE_MANAGED_IDENTITY', environment === 'production')
+        }
       },
       
       database: {
