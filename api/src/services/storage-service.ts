@@ -1,5 +1,6 @@
 import { BlobServiceClient, ContainerClient, BlobUploadCommonResponse } from '@azure/storage-blob';
 import { logger } from '../utils/logger';
+import { cdnService } from './cdn-service';
 
 /**
  * StorageService
@@ -87,7 +88,7 @@ export class StorageService {
         uploadOptions
       );
 
-      const url = this.getPublicUrl(blobName);
+      const url = await this.getPublicUrl(blobName);
       
       logger.info(`Audio uploaded successfully: ${blobName}`, {
         submissionId,
@@ -135,7 +136,7 @@ export class StorageService {
         uploadOptions
       );
 
-      const url = this.getPublicUrl(blobName);
+      const url = await this.getPublicUrl(blobName);
       
       logger.info(`Transcript uploaded successfully: ${blobName}`, {
         submissionId,
@@ -183,7 +184,7 @@ export class StorageService {
         uploadOptions
       );
 
-      const url = this.getPublicUrl(blobName);
+      const url = await this.getPublicUrl(blobName);
       
       logger.info(`Dialogue script uploaded successfully: ${blobName}`, {
         submissionId,
@@ -231,7 +232,7 @@ export class StorageService {
         uploadOptions
       );
 
-      const url = this.getPublicUrl(blobName);
+      const url = await this.getPublicUrl(blobName);
       
       logger.info(`Summary uploaded successfully: ${blobName}`, {
         submissionId,
@@ -280,7 +281,7 @@ export class StorageService {
         uploadOptions
       );
 
-      const url = this.getPublicUrl(blobName);
+      const url = await this.getPublicUrl(blobName);
       
       logger.info(`Chapter markers uploaded successfully: ${blobName}`, {
         submissionId,
@@ -319,6 +320,16 @@ export class StorageService {
       }
 
       await Promise.all(deletePromises);
+      
+      // Purge CDN cache for deleted files
+      if (cdnService.checkHealth()) {
+        try {
+          await cdnService.purgeSubmissionContent(submissionId);
+          logger.info(`CDN cache purged for submission: ${submissionId}`);
+        } catch (error) {
+          logger.warn('Failed to purge CDN cache for deleted files', { error, submissionId });
+        }
+      }
       
       logger.info(`Deleted files for submission: ${submissionId}`, {
         submissionId,
@@ -399,11 +410,23 @@ export class StorageService {
   /**
    * Generate public URL for a blob
    */
-  private getPublicUrl(blobName: string): string {
+  private async getPublicUrl(blobName: string): Promise<string> {
+    // Try CDN first if configured
     if (this.config.cdnBaseUrl) {
       return `${this.config.cdnBaseUrl}/${blobName}`;
     }
+
+    // Try to get CDN endpoint URL if CDN service is healthy
+    if (cdnService.checkHealth()) {
+      try {
+        const cdnUrl = await cdnService.getEndpointUrl();
+        return `${cdnUrl}/${blobName}`;
+      } catch (error) {
+        logger.warn('Failed to get CDN URL, falling back to blob storage URL', { error });
+      }
+    }
     
+    // Fallback to direct blob storage URL
     const accountName = this.config.connectionString.match(/AccountName=([^;]+)/)?.[1];
     if (!accountName) {
       throw new Error('Could not extract account name from connection string');

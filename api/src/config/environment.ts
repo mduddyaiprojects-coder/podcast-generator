@@ -39,6 +39,13 @@ export interface EnvironmentConfig {
       connectionString?: string;
       useManagedIdentity: boolean;
     };
+    cdn: {
+      profileName: string;
+      endpointName: string;
+      customDomain?: string;
+      enableCompression: boolean;
+      enableHttps: boolean;
+    };
   };
   database: {
     url?: string;
@@ -118,6 +125,13 @@ export class EnvironmentService {
           accountName: process.env['AZURE_BLOB_STORAGE_ACCOUNT_NAME'] || '',
           connectionString: process.env['AZURE_BLOB_STORAGE_CONNECTION_STRING'],
           useManagedIdentity: this.getBooleanEnv('AZURE_BLOB_STORAGE_USE_MANAGED_IDENTITY', environment === 'production')
+        },
+        cdn: {
+          profileName: process.env['CDN_PROFILE_NAME'] || `podcast-generator-cdn-${environment}`,
+          endpointName: process.env['CDN_ENDPOINT_NAME'] || `podcast-generator-endpoint-${environment}`,
+          customDomain: process.env['CDN_CUSTOM_DOMAIN'],
+          enableCompression: this.getBooleanEnv('CDN_ENABLE_COMPRESSION', true),
+          enableHttps: this.getBooleanEnv('CDN_ENABLE_HTTPS', true)
         }
       },
       

@@ -23,6 +23,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@azure/arm-cdn": "^8.0.0",
     "@azure/functions": "^4.8.0",
     "@azure/identity": "^4.12.0",
     "@azure/openai": "^2.0.0",

@@ -1,219 +1,318 @@
-import { CDNService } from '../../src/services/cdn-service';
+import { CdnService } from '../../src/services/cdn-service';
 import { environmentService } from '../../src/config/environment';
 
-// Mock the logger
-jest.mock('../../src/utils/logger', () => ({
-  logger: {
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn()
-  }
+// Mock the CDN management client
+jest.mock('@azure/arm-cdn', () => ({
+  CdnManagementClient: jest.fn().mockImplementation(() => ({
+    profiles: {
+      createOrUpdate: jest.fn().mockResolvedValue({}),
+      get: jest.fn().mockResolvedValue({ name: 'test-profile' })
+    },
+    endpoints: {
+      createOrUpdate: jest.fn().mockResolvedValue({}),
+      get: jest.fn().mockResolvedValue({ 
+        hostName: 'test-endpoint.azureedge.net',
+        properties: { hostName: 'test-endpoint.azureedge.net' }
+      }),
+      purgeContent: jest.fn().mockResolvedValue({})
+    }
+  }))
 }));
 
-// Mock the environment service
+// Mock environment service
 jest.mock('../../src/config/environment', () => ({
   environmentService: {
     getConfig: jest.fn().mockReturnValue({
       storage: {
-        cdnBaseUrl: 'https://podcastgen-cdn-exa2dkdcebdfbfct.z02.azurefd.net'
+        blobStorage: {
+          accountName: 'teststorageaccount',
+          useManagedIdentity: true
+        },
+        containerName: 'test-container'
       }
     })
   }
 }));
 
-describe('CDNService', () => {
-  let service: CDNService;
+describe('CdnService', () => {
+  let cdnService: CdnService;
+  let mockCdnClient: any;
 
   beforeEach(() => {
+    // Reset mocks
     jest.clearAllMocks();
-    service = new CDNService();
+    
+    // Set up environment variables
+    process.env.AZURE_SUBSCRIPTION_ID = 'test-subscription-id';
+    process.env.AZURE_RESOURCE_GROUP_NAME = 'test-rg';
+    
+    cdnService = new CdnService();
+    mockCdnClient = (cdnService as any).client;
+  });
+
+  afterEach(() => {
+    delete process.env.AZURE_SUBSCRIPTION_ID;
+    delete process.env.AZURE_RESOURCE_GROUP_NAME;
   });
 
   describe('constructor', () => {
-    it('should initialize with valid configuration', () => {
-      expect(service.checkHealth()).toBe(true);
-      expect(service.getServiceInfo().healthy).toBe(true);
+    it('should initialize with correct configuration', () => {
+      const config = cdnService.getConfig();
+      
+      expect(config.subscriptionId).toBe('test-subscription-id');
+      expect(config.resourceGroupName).toBe('test-rg');
+      expect(config.profileName).toBe('podcast-generator-cdn-dev');
+      expect(config.endpointName).toBe('podcast-generator-endpoint-dev');
+      expect(config.originHostName).toBe('teststorageaccount.blob.core.windows.net');
     });
 
-    it('should handle missing CDN base URL', () => {
-      (environmentService.getConfig as jest.Mock).mockReturnValueOnce({
-        storage: {
-          cdnBaseUrl: ''
-        }
-      });
+    it('should be healthy when properly configured', () => {
+      expect(cdnService.checkHealth()).toBe(true);
+    });
 
-      const unhealthyService = new CDNService();
+    it('should be unhealthy when missing required config', () => {
+      delete process.env.AZURE_SUBSCRIPTION_ID;
+      const unhealthyService = new CdnService();
       expect(unhealthyService.checkHealth()).toBe(false);
     });
   });
 
-  describe('convertToCdnUrl', () => {
-    it('should convert blob storage URL to CDN URL', () => {
-      const blobUrl = 'https://podcastgenstorage.blob.core.windows.net/test-container/audio.mp3';
-      const result = service.convertToCdnUrl(blobUrl);
-
-      expect(result).toEqual({
-        originalUrl: blobUrl,
-        cdnUrl: 'https://podcastgen-cdn-exa2dkdcebdfbfct.z02.azurefd.net/test-container/audio.mp3',
-        isCdnEnabled: true
-      });
+  describe('createOrUpdateProfile', () => {
+    it('should create CDN profile successfully', async () => {
+      await cdnService.createOrUpdateProfile('Standard_Microsoft');
+      
+      expect(mockCdnClient.profiles.createOrUpdate).toHaveBeenCalledWith(
+        'test-rg',
+        'podcast-generator-cdn-dev',
+        expect.objectContaining({
+          location: 'Global',
+          sku: { name: 'Standard_Microsoft' },
+          tags: expect.objectContaining({
+            purpose: 'podcast-generator-cdn'
+          })
+        })
+      );
     });
 
-    it('should handle invalid URL format', () => {
-      const invalidUrl = 'https://podcastgenstorage.blob.core.windows.net/invalid';
-      const result = service.convertToCdnUrl(invalidUrl);
-
-      expect(result).toEqual({
-        originalUrl: invalidUrl,
-        cdnUrl: invalidUrl,
-        isCdnEnabled: false
-      });
-    });
-
-    it('should handle malformed URL', () => {
-      const malformedUrl = 'not-a-valid-url';
-      const result = service.convertToCdnUrl(malformedUrl);
-
-      expect(result).toEqual({
-        originalUrl: malformedUrl,
-        cdnUrl: malformedUrl,
-        isCdnEnabled: false
-      });
-    });
-
-    it('should return original URL when service is unhealthy', () => {
-      (environmentService.getConfig as jest.Mock).mockReturnValueOnce({
-        storage: {
-          cdnBaseUrl: ''
-        }
-      });
-
-      const unhealthyService = new CDNService();
-      const blobUrl = 'https://podcastgenstorage.blob.core.windows.net/test-container/audio.mp3';
-      const result = unhealthyService.convertToCdnUrl(blobUrl);
-
-      expect(result).toEqual({
-        originalUrl: blobUrl,
-        cdnUrl: blobUrl,
-        isCdnEnabled: false
-      });
+    it('should handle different SKU types', async () => {
+      await cdnService.createOrUpdateProfile('Premium_Verizon');
+      
+      expect(mockCdnClient.profiles.createOrUpdate).toHaveBeenCalledWith(
+        'test-rg',
+        'podcast-generator-cdn-dev',
+        expect.objectContaining({
+          sku: { name: 'Premium_Verizon' }
+        })
+      );
     });
   });
 
-  describe('generateCdnUrl', () => {
-    it('should generate CDN URL for container and blob', () => {
-      const cdnUrl = service.generateCdnUrl('test-container', 'audio.mp3');
-      expect(cdnUrl).toBe('https://podcastgen-cdn-exa2dkdcebdfbfct.z02.azurefd.net/test-container/audio.mp3');
+  describe('createOrUpdateEndpoint', () => {
+    it('should create CDN endpoint with default configuration', async () => {
+      await cdnService.createOrUpdateEndpoint();
+      
+      expect(mockCdnClient.endpoints.createOrUpdate).toHaveBeenCalledWith(
+        'test-rg',
+        'podcast-generator-cdn-dev',
+        'podcast-generator-endpoint-dev',
+        expect.objectContaining({
+          location: 'Global',
+          isHttpsEnabled: true,
+          isHttpAllowed: false,
+          isCompressionEnabled: true,
+          queryStringCachingBehavior: 'IgnoreQueryString',
+          origins: expect.arrayContaining([
+            expect.objectContaining({
+              name: 'blob-storage-origin',
+              hostName: 'teststorageaccount.blob.core.windows.net'
+            })
+          ])
+        })
+      );
     });
 
-    it('should return empty string when service is unhealthy', () => {
-      (environmentService.getConfig as jest.Mock).mockReturnValueOnce({
-        storage: {
-          cdnBaseUrl: ''
-        }
-      });
+    it('should create CDN endpoint with custom configuration', async () => {
+      const customConfig = {
+        isHttpsEnabled: false,
+        isHttpAllowed: true,
+        compressionEnabled: false
+      };
+      
+      await cdnService.createOrUpdateEndpoint(customConfig);
+      
+      expect(mockCdnClient.endpoints.createOrUpdate).toHaveBeenCalledWith(
+        'test-rg',
+        'podcast-generator-cdn-dev',
+        'podcast-generator-endpoint-dev',
+        expect.objectContaining({
+          isHttpsEnabled: false,
+          isHttpAllowed: true,
+          isCompressionEnabled: false
+        })
+      );
+    });
+  });
 
-      const unhealthyService = new CDNService();
-      const cdnUrl = unhealthyService.generateCdnUrl('test-container', 'audio.mp3');
-      expect(cdnUrl).toBe('');
+  describe('getEndpointUrl', () => {
+    it('should return CDN endpoint URL', async () => {
+      const url = await cdnService.getEndpointUrl();
+      
+      expect(url).toBe('https://test-endpoint.azureedge.net');
+      expect(mockCdnClient.endpoints.get).toHaveBeenCalledWith(
+        'test-rg',
+        'podcast-generator-cdn-dev',
+        'podcast-generator-endpoint-dev'
+      );
+    });
+
+    it('should throw error when hostname not found', async () => {
+      mockCdnClient.endpoints.get.mockResolvedValueOnce({});
+      
+      await expect(cdnService.getEndpointUrl()).rejects.toThrow('CDN endpoint hostname not found');
     });
   });
 
   describe('purgeCache', () => {
-    it('should purge cache for specific path', async () => {
-      const result = await service.purgeCache('/test-container/audio.mp3');
-
-      expect(result.success).toBe(true);
-      expect(result.message).toBe('Cache purged successfully');
-      expect(result.purgeId).toBeDefined();
-    });
-
-    it('should purge all cache', async () => {
-      const result = await service.purgeAllCache();
-
-      expect(result.success).toBe(true);
-      expect(result.message).toBe('Cache purged successfully');
-      expect(result.purgeId).toBeDefined();
-    });
-
-    it('should return failure when service is unhealthy', async () => {
-      (environmentService.getConfig as jest.Mock).mockReturnValueOnce({
-        storage: {
-          cdnBaseUrl: ''
-        }
-      });
-
-      const unhealthyService = new CDNService();
-      const result = await unhealthyService.purgeCache('/test-container/audio.mp3');
-
-      expect(result.success).toBe(false);
-      expect(result.message).toBe('CDN service is not healthy');
+    it('should purge CDN cache successfully', async () => {
+      const purgeConfig = {
+        contentPaths: ['/audio/test.mp3', '/transcripts/test.txt'],
+        domains: ['test-endpoint.azureedge.net']
+      };
+      
+      await cdnService.purgeCache(purgeConfig);
+      
+      expect(mockCdnClient.endpoints.purgeContent).toHaveBeenCalledWith(
+        'test-rg',
+        'podcast-generator-cdn-dev',
+        'podcast-generator-endpoint-dev',
+        purgeConfig
+      );
     });
   });
 
-  describe('checkHealth', () => {
-    it('should return true when healthy', () => {
-      expect(service.checkHealth()).toBe(true);
-    });
-
-    it('should return false when unhealthy', () => {
-      (environmentService.getConfig as jest.Mock).mockReturnValueOnce({
-        storage: {
-          cdnBaseUrl: ''
+  describe('purgeSubmissionContent', () => {
+    it('should purge all content for a submission', async () => {
+      const submissionId = 'test-submission-123';
+      
+      await cdnService.purgeSubmissionContent(submissionId);
+      
+      expect(mockCdnClient.endpoints.purgeContent).toHaveBeenCalledWith(
+        'test-rg',
+        'podcast-generator-cdn-dev',
+        'podcast-generator-endpoint-dev',
+        {
+          contentPaths: [
+            `/audio/${submissionId}.mp3`,
+            `/transcripts/${submissionId}.txt`,
+            `/scripts/${submissionId}.txt`,
+            `/summaries/${submissionId}.txt`,
+            `/chapters/${submissionId}.json`
+          ]
         }
-      });
+      );
+    });
+  });
 
-      const unhealthyService = new CDNService();
-      expect(unhealthyService.checkHealth()).toBe(false);
+  describe('getAnalytics', () => {
+    it('should return analytics data', async () => {
+      const startDate = new Date('2024-01-01');
+      const endDate = new Date('2024-01-02');
+      
+      const analytics = await cdnService.getAnalytics(startDate, endDate);
+      
+      expect(analytics).toEqual({
+        totalRequests: 0,
+        totalDataTransferred: 0,
+        cacheHitRatio: 0,
+        averageResponseTime: 0,
+        topCountries: [],
+        topUserAgents: []
+      });
+    });
+  });
+
+  describe('getDefaultCacheRules', () => {
+    it('should return correct cache rules for different content types', () => {
+      const rules = (cdnService as any).getDefaultCacheRules();
+      
+      expect(rules).toHaveLength(3);
+      
+      // Audio files rule
+      expect(rules[0]).toEqual({
+        name: 'audio-cache-rule',
+        order: 1,
+        conditions: [{
+          name: 'UrlPath',
+          parameters: {
+            operator: 'BeginsWith',
+            matchValues: ['/audio/']
+          }
+        }],
+        actions: [{
+          name: 'CacheExpiration',
+          parameters: {
+            cacheBehavior: 'Override',
+            cacheDuration: '365.00:00:00'
+          }
+        }]
+      });
+      
+      // Text files rule
+      expect(rules[1]).toEqual({
+        name: 'text-cache-rule',
+        order: 2,
+        conditions: [{
+          name: 'UrlPath',
+          parameters: {
+            operator: 'BeginsWith',
+            matchValues: ['/transcripts/', '/scripts/', '/summaries/']
+          }
+        }],
+        actions: [{
+          name: 'CacheExpiration',
+          parameters: {
+            cacheBehavior: 'Override',
+            cacheDuration: '7.00:00:00'
+          }
+        }]
+      });
+      
+      // JSON files rule
+      expect(rules[2]).toEqual({
+        name: 'json-cache-rule',
+        order: 3,
+        conditions: [{
+          name: 'UrlPath',
+          parameters: {
+            operator: 'BeginsWith',
+            matchValues: ['/chapters/']
+          }
+        }],
+        actions: [{
+          name: 'CacheExpiration',
+          parameters: {
+            cacheBehavior: 'Override',
+            cacheDuration: '1.00:00:00'
+          }
+        }]
+      });
     });
   });
 
   describe('getServiceInfo', () => {
     it('should return service information', () => {
-      const info = service.getServiceInfo();
-
+      const info = cdnService.getServiceInfo();
+      
       expect(info).toEqual({
-        name: 'Azure Front Door CDN',
+        name: 'Azure CDN',
         healthy: true,
         config: {
-          baseUrl: 'https://podcastgen-cdn-exa2dkdcebdfbfct.z02.azurefd.net',
-          profileName: 'podcastgen-afd-profile',
-          endpointName: 'podcastgen-cdn',
-          resourceGroup: 'rg-m4c-apps'
+          subscriptionId: 'test-subscription-id',
+          resourceGroupName: 'test-rg',
+          profileName: 'podcast-generator-cdn-dev',
+          endpointName: 'podcast-generator-endpoint-dev',
+          useManagedIdentity: true
         }
-      });
-    });
-  });
-
-  describe('getBaseUrl', () => {
-    it('should return CDN base URL', () => {
-      const baseUrl = service.getBaseUrl();
-      expect(baseUrl).toBe('https://podcastgen-cdn-exa2dkdcebdfbfct.z02.azurefd.net');
-    });
-  });
-
-  describe('isCdnUrl', () => {
-    it('should identify CDN URLs', () => {
-      expect(service.isCdnUrl('https://podcastgen-cdn-exa2dkdcebdfbfct.z02.azurefd.net/container/blob.mp3')).toBe(true);
-      expect(service.isCdnUrl('https://podcastgenstorage.blob.core.windows.net/container/blob.mp3')).toBe(false);
-      expect(service.isCdnUrl('https://example.com/file.mp3')).toBe(false);
-    });
-
-    it('should handle invalid URLs', () => {
-      expect(service.isCdnUrl('not-a-url')).toBe(false);
-      expect(service.isCdnUrl('')).toBe(false);
-    });
-  });
-
-  describe('getCacheStats', () => {
-    it('should return cache statistics', async () => {
-      const stats = await service.getCacheStats();
-
-      expect(stats).toEqual({
-        totalRequests: 1000,
-        cacheHits: 850,
-        cacheMisses: 150,
-        hitRatio: 0.85
       });
     });
   });
