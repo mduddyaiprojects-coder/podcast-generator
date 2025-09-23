@@ -151,7 +151,7 @@ export class MockCdnService {
     return {
       url: `${this.config.baseUrl}${path}`,
       fromCache,
-      compressed: shouldCompress,
+      compressed: shouldCompress || false,
       responseTime
     };
   }
@@ -248,7 +248,7 @@ export class MockCdnService {
   /**
    * Simulate CDN analytics
    */
-  async getAnalytics(startDate: Date, endDate: Date): Promise<{
+  async getAnalytics(_startDate: Date, _endDate: Date): Promise<{
     totalRequests: number;
     totalDataTransferred: number;
     cacheHitRatio: number;
