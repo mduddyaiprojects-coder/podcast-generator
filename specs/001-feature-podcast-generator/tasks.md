@@ -147,13 +147,13 @@
 - [x] T068 Test file upload/download performance
 
 ## Phase 3.9: RSS Feed Implementation
-- [ ] T069 [P] RSS XML generation in api/src/services/rss-generator.ts
-- [ ] T070 [P] iTunes namespace compliance in api/src/utils/rss-utils.ts
-- [ ] T071 [P] RSS feed validation in api/src/utils/rss-validator.ts
-- [ ] T072 [P] Episode metadata formatting in api/src/utils/episode-utils.ts
-- [ ] T073 Configure RSS feed caching and performance
-- [ ] T074 Test RSS feed compatibility with podcast apps
-- [ ] T075 Validate RSS feed against iTunes requirements
+- [x] T069 [P] RSS XML generation in api/src/services/rss-generator.ts
+- [x] T070 [P] iTunes namespace compliance in api/src/utils/rss-utils.ts
+- [x] T071 [P] RSS feed validation in api/src/utils/rss-validator.ts
+- [x] T072 [P] Episode metadata formatting in api/src/utils/episode-utils.ts
+- [x] T073 Configure RSS feed caching and performance
+- [x] T074 Test RSS feed compatibility with podcast apps
+- [x] T075 Validate RSS feed against iTunes requirements
 
 ## Phase 3.10: Polish
 - [ ] T076 [P] Unit tests for all services in tests/unit/
