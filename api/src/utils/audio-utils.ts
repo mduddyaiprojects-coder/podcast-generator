@@ -268,7 +268,7 @@ export class AudioUtils {
   estimateAudioFileSize(
     durationSeconds: number,
     bitrateKbps: number,
-    channels: number = 2
+    _channels: number = 2
   ): number {
     // Calculate size in bytes
     const bitsPerSecond = bitrateKbps * 1000;
@@ -515,7 +515,7 @@ export class AudioUtils {
     };
   }
 
-  private determineQuality(bitrate: number, sampleRate: number, channels: number): 'low' | 'medium' | 'high' | 'lossless' {
+  private determineQuality(bitrate: number, sampleRate: number, _channels: number): 'low' | 'medium' | 'high' | 'lossless' {
     if (bitrate >= 256 && sampleRate >= 44100) {
       return 'high';
     } else if (bitrate >= 128 && sampleRate >= 22050) {
