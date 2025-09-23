@@ -1,12 +1,17 @@
 import { HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
+import { RssCacheService } from '../services/rss-cache-service';
+import { DatabaseService } from '../services/database-service';
+import { logger } from '../utils/logger';
 
 /**
  * GET /api/feeds/{slug}/rss.xml
  * 
- * Generates and returns the RSS feed for the podcast.
+ * Generates and returns the RSS feed for the podcast with caching and performance optimization.
  * Since we're using a single public feed, the slug parameter is ignored.
  */
 export async function rssFeedFunction(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
+  const startTime = Date.now();
+  
   try {
     const feedSlug = request.params['slug'];
 
@@ -22,24 +27,70 @@ export async function rssFeedFunction(request: HttpRequest, context: InvocationC
       };
     }
 
-    context.log('RSS feed request received for slug:', feedSlug);
+    logger.info('RSS feed request received', { feedSlug });
 
-    // For now, return a simple RSS feed without database dependency
-    const rssContent = generateSimpleRSS();
+    // Parse query parameters for cache options
+    const options = parseRssOptions(request);
+    
+    // Initialize services
+    const rssCacheService = new RssCacheService();
+    const databaseService = new DatabaseService();
+
+    // Get episodes from database
+    const episodes = await databaseService.getEpisodes({
+      limit: options.maxEpisodes || 100,
+      sortBy: 'pub_date',
+      sortOrder: options.sortOrder || 'desc'
+    });
+
+    // Get RSS feed with caching
+    const rssResult = await rssCacheService.getRssFeed(episodes, feedSlug, options);
+
+    // Set appropriate headers
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/rss+xml; charset=utf-8',
+      'Cache-Control': 'public, max-age=300, s-maxage=3600',
+      'ETag': rssResult.etag,
+      'Last-Modified': rssResult.lastModified.toUTCString(),
+      'X-Cache': rssResult.fromCache ? 'HIT' : 'MISS',
+      'X-Response-Time': `${rssResult.responseTime}ms`
+    };
+
+    // Add compression headers if content is compressed
+    if (options.compression !== false) {
+      headers['Content-Encoding'] = 'gzip';
+      headers['Vary'] = 'Accept-Encoding';
+    }
+
+    logger.info('RSS feed generated successfully', {
+      feedSlug,
+      episodeCount: episodes.length,
+      fromCache: rssResult.fromCache,
+      responseTime: rssResult.responseTime,
+      contentLength: rssResult.content.length
+    });
 
     return {
       status: 200,
-      headers: {
-        'Content-Type': 'application/rss+xml',
-        'Cache-Control': 'public, max-age=300'
-      },
-      body: rssContent
+      headers,
+      body: rssResult.content
     };
 
   } catch (error) {
-    context.log('RSS feed error:', error);
+    const responseTime = Date.now() - startTime;
+    
+    logger.error('RSS feed generation failed', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      responseTime,
+      feedSlug: request.params['slug']
+    });
+
     return {
       status: 500,
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Response-Time': `${responseTime}ms`
+      },
       jsonBody: {
         error: 'INTERNAL_ERROR',
         message: 'Failed to generate RSS feed',
@@ -54,40 +105,20 @@ function isValidFeedSlug(slug: string): boolean {
   return /^[a-zA-Z0-9_-]+$/.test(slug);
 }
 
-function generateSimpleRSS(): string {
-  const now = new Date().toISOString();
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
-  <channel>
-    <title>Podcast Generator</title>
-    <description>AI-generated podcast episodes</description>
-    <link>https://podcast-generator.example.com</link>
-    <language>en-us</language>
-    <lastBuildDate>${now}</lastBuildDate>
-    <pubDate>${now}</pubDate>
-    <managingEditor>noreply@example.com</managingEditor>
-    <webMaster>noreply@example.com</webMaster>
-    <generator>Podcast Generator v1.0</generator>
-    <itunes:author>Podcast Generator</itunes:author>
-    <itunes:summary>AI-generated podcast episodes from web content</itunes:summary>
-    <itunes:owner>
-      <itunes:name>Podcast Generator</itunes:name>
-      <itunes:email>noreply@example.com</itunes:email>
-    </itunes:owner>
-    <itunes:image href="https://podcast-generator.example.com/logo.jpg"/>
-    <itunes:category text="Technology"/>
-    <itunes:explicit>false</itunes:explicit>
-    <item>
-      <title>Welcome to Podcast Generator</title>
-      <description>This is a sample episode. The RSS feed is working!</description>
-      <link>https://podcast-generator.example.com/episodes/welcome</link>
-      <guid isPermaLink="false">welcome-episode-001</guid>
-      <pubDate>${now}</pubDate>
-      <enclosure url="https://podcast-generator.example.com/audio/welcome.mp3" type="audio/mpeg" length="0"/>
-      <itunes:author>Podcast Generator</itunes:author>
-      <itunes:duration>00:05:00</itunes:duration>
-      <itunes:explicit>false</itunes:explicit>
-    </item>
-  </channel>
-</rss>`;
+function parseRssOptions(request: HttpRequest): {
+  includeChapters?: boolean;
+  includeTranscript?: boolean;
+  maxEpisodes?: number;
+  sortOrder?: 'newest' | 'oldest';
+  compression?: boolean;
+} {
+  const query = request.query;
+  
+  return {
+    includeChapters: query.get('chapters') === 'true',
+    includeTranscript: query.get('transcript') === 'true',
+    maxEpisodes: query.get('limit') ? parseInt(query.get('limit')!, 10) : undefined,
+    sortOrder: query.get('sort') === 'oldest' ? 'oldest' : 'newest',
+    compression: query.get('compress') !== 'false'
+  };
 }
