@@ -143,8 +143,8 @@
 - [x] T064 [P] File upload and download utilities in api/src/utils/file-utils.ts
 - [x] T065 [P] Audio file processing utilities in api/src/utils/audio-utils.ts
 - [x] T066 Configure storage lifecycle policies for cost optimization
-- [ ] T067 Set up CDN caching rules and invalidation
-- [ ] T068 Test file upload/download performance
+- [x] T067 Set up CDN caching rules and invalidation
+- [x] T068 Test file upload/download performance
 
 ## Phase 3.9: RSS Feed Implementation
 - [ ] T069 [P] RSS XML generation in api/src/services/rss-generator.ts
