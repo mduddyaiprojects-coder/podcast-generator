@@ -128,6 +128,13 @@ async function handlePostRequest(
         body: JSON.stringify(lifecycleStats)
       };
 
+    case 'cost-optimization':
+      const recommendations = await lifecycleService.getCostOptimizationRecommendations();
+      return {
+        status: 200,
+        body: JSON.stringify(recommendations)
+      };
+
     case 'cleanup-temp':
       const deletedCount = await lifecycleService.cleanupTemporaryFiles();
       return {
