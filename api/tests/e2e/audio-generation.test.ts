@@ -379,7 +379,8 @@ describe('Audio Generation - End-to-End Tests', () => {
       
       // Check audio format (should be MP3)
       expect(audioResult.audio_buffer[0]).toBe(0xFF); // MP3 header starts with 0xFF
-      expect(audioResult.audio_buffer[1]).toBe(0xFB); // MP3 header continues with 0xFB
+      // Check for valid MP3 header (0xFF followed by valid sync bits)
+      expect(audioResult.audio_buffer[1]! & 0xE0).toBe(0xE0); // Valid MP3 sync bits
 
       logger.info('Audio Quality: Successfully generated high-quality audio');
     }, 30000);

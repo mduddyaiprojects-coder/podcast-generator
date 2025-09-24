@@ -85,6 +85,11 @@ export class TTSService {
   ): Promise<TTSResult> {
     const startTime = Date.now();
     const mergedConfig = { ...this.defaultConfig, ...config };
+    
+    // Handle voice_id to voice_name mapping for Azure Speech
+    if (config.voice_id && !config.voice_name) {
+      mergedConfig.voice_name = config.voice_id;
+    }
 
     try {
       logger.info(`Generating TTS audio for ${text.length} characters using ${mergedConfig.provider}`);
@@ -106,6 +111,11 @@ export class TTSService {
       return result;
     } catch (error) {
       logger.error('TTS generation failed:', error);
+      
+      // Don't fallback for empty text errors - these should be thrown
+      if (error instanceof Error && error.message.includes('Text input cannot be empty')) {
+        throw error;
+      }
       
       // Try fallback provider if primary fails
       if (mergedConfig.provider === 'elevenlabs') {
@@ -192,10 +202,13 @@ export class TTSService {
     try {
       logger.info('Generating audio with Azure Speech Services');
       
+      // Map voice_id to voice_name for Azure Speech compatibility
+      const voiceName = config.voice_name || config.voice_id || 'en-US-AriaNeural';
+      
       // Use Azure Speech service to generate audio
       const azureResult = await this.azureSpeechService.generateAudio(
         text, 
-        config.voice_name || 'en-US-AriaNeural'
+        voiceName
       );
       
       // Calculate quality score

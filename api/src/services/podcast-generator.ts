@@ -47,11 +47,12 @@ export class PodcastGenerator {
         id: this.generateEpisodeId(),
         title: content.title,
         description: content.summary,
-        source_url: content.metadata.originalUrl || '',
+        source_url: content.metadata?.originalUrl || (content as any).url || '',
         content_type: 'url', // Default to URL type
         audio_url: audioResult.url,
         audio_duration: duration,
         audio_size: audioResult.size,
+        transcript: script, // Use script as transcript
         dialogue_script: script,
         summary: content.summary,
         chapter_markers: this.generateChapterMarkers(script, duration),
@@ -89,15 +90,41 @@ export class PodcastGenerator {
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i]?.trim();
       if (!line) continue;
-      if (line.length > 10 && line.length < 100 && 
+      
+      // More lenient criteria for chapter markers
+      if (line.length > 5 && line.length < 150 && 
           (line.endsWith('?') || line.includes('Introduction') || line.includes('Conclusion') || 
-           line.includes('First') || line.includes('Next') || line.includes('Finally'))) {
+           line.includes('First') || line.includes('Next') || line.includes('Finally') ||
+           line.includes('Welcome') || line.includes('Hello') || line.includes('Thanks') ||
+           line.includes('Summary') || line.includes('Overview') || line.includes('Key') ||
+           line.includes('Important') || line.includes('Remember') || line.includes('Note'))) {
         markers.push({
           title: line,
           start_time: Math.floor((i / lines.length) * estimatedDuration),
           end_time: Math.floor(((i + 1) / lines.length) * estimatedDuration)
         });
       }
+    }
+    
+    // If no markers found, create some basic ones based on script structure
+    if (markers.length === 0 && lines.length > 3) {
+      markers.push(
+        {
+          title: 'Introduction',
+          start_time: 0,
+          end_time: Math.floor(estimatedDuration / 3)
+        },
+        {
+          title: 'Main Content',
+          start_time: Math.floor(estimatedDuration / 3),
+          end_time: Math.floor((estimatedDuration * 2) / 3)
+        },
+        {
+          title: 'Conclusion',
+          start_time: Math.floor((estimatedDuration * 2) / 3),
+          end_time: estimatedDuration
+        }
+      );
     }
     
     return markers;

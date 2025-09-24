@@ -44,6 +44,11 @@ export class AzureSpeechService {
       throw new Error('Azure Speech service not configured or unhealthy');
     }
 
+    // Validate input text
+    if (!text || text.trim().length === 0) {
+      throw new Error('Text input cannot be empty');
+    }
+
     try {
       logger.info('Generating audio with Azure Speech Services', {
         textLength: text.length,
