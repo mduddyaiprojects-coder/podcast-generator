@@ -39,8 +39,8 @@ export class PodcastGenerator {
       // Upload audio to storage
       const audioResult = await this.storageService.uploadAudio(audioBuffer, submissionId);
 
-      // Calculate duration (estimate)
-      const duration = this.estimateDuration(script);
+      // Use actual audio duration from TTS service
+      const actualDuration = ttsResult.duration_seconds;
 
       // Create episode
       const episode = new PodcastEpisode({
@@ -50,12 +50,12 @@ export class PodcastGenerator {
         source_url: content.metadata?.originalUrl || (content as any).url || '',
         content_type: 'url', // Default to URL type
         audio_url: audioResult.url,
-        audio_duration: duration,
+        audio_duration: actualDuration,
         audio_size: audioResult.size,
         transcript: script, // Use script as transcript
         dialogue_script: script,
         summary: content.summary,
-        chapter_markers: this.generateChapterMarkers(script, duration),
+        chapter_markers: this.generateChapterMarkers(script, actualDuration),
         pub_date: new Date(),
         submission_id: submissionId
       });
@@ -125,6 +125,38 @@ export class PodcastGenerator {
           end_time: estimatedDuration
         }
       );
+    }
+    
+    // Fix overlapping markers by ensuring proper sequencing
+    return this.fixOverlappingMarkers(markers, estimatedDuration);
+  }
+
+  private fixOverlappingMarkers(markers: any[], totalDuration: number): any[] {
+    if (markers.length === 0) return markers;
+    
+    // Sort markers by start_time
+    markers.sort((a, b) => a.start_time - b.start_time);
+    
+    // Fix overlapping markers
+    for (let i = 0; i < markers.length - 1; i++) {
+      const current = markers[i];
+      const next = markers[i + 1];
+      
+      // If current marker ends after next marker starts, adjust end time
+      if (current.end_time > next.start_time) {
+        current.end_time = next.start_time;
+      }
+      
+      // Ensure end time doesn't exceed total duration
+      if (current.end_time > totalDuration) {
+        current.end_time = totalDuration;
+      }
+    }
+    
+    // Ensure last marker doesn't exceed total duration
+    const lastMarker = markers[markers.length - 1];
+    if (lastMarker && lastMarker.end_time > totalDuration) {
+      lastMarker.end_time = totalDuration;
     }
     
     return markers;

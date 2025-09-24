@@ -280,6 +280,11 @@ export class ApiKeySecurityService {
         logger.error('Error in periodic security validation', error);
       }
     }, 5 * 60 * 1000);
+    
+    // Unref to prevent Jest from hanging
+    if (this.intervalId) {
+      this.intervalId.unref();
+    }
 
     // Initial validation
     this.timeoutId = setTimeout(async () => {
@@ -290,6 +295,11 @@ export class ApiKeySecurityService {
         logger.error('Error in initial security validation', error);
       }
     }, 1000);
+    
+    // Unref to prevent Jest from hanging
+    if (this.timeoutId) {
+      this.timeoutId.unref();
+    }
   }
 
   /**

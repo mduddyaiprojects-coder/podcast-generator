@@ -30,6 +30,11 @@ describe('Audio Generation - End-to-End Tests', () => {
     jest.clearAllTimers();
     jest.useRealTimers();
     
+    // Force garbage collection if available
+    if (global.gc) {
+      global.gc();
+    }
+    
     logger.info('Audio Generation E2E: Tests completed');
   });
 

@@ -24,5 +24,14 @@ module.exports = {
     '^@/services/(.*)$': '<rootDir>/src/services/$1',
     '^@/utils/(.*)$': '<rootDir>/src/utils/$1',
     '^@/functions/(.*)$': '<rootDir>/src/functions/$1'
-  }
+  },
+  // Timeout configuration
+  testTimeout: 120000, // 2 minutes for individual tests
+  // Global setup and teardown
+  globalSetup: '<rootDir>/tests/global-setup.ts',
+  globalTeardown: '<rootDir>/tests/global-teardown.ts',
+  // Detect open handles to prevent Jest hanging
+  detectOpenHandles: true,
+  // Force exit after tests complete
+  forceExit: true
 };

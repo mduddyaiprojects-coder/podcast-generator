@@ -67,6 +67,12 @@ describe('RSS Feed Generation - End-to-End Tests', () => {
     // Clear all timers to prevent Jest from hanging
     jest.clearAllTimers();
     jest.useRealTimers();
+    
+    // Force garbage collection if available
+    if (global.gc) {
+      global.gc();
+    }
+    
     logger.info('RSS Feed E2E: Tests completed');
   });
 

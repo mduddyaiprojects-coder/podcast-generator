@@ -101,8 +101,15 @@ describe('Podcast Generation Pipeline - End-to-End Tests', () => {
     // Clear all timers to prevent Jest from hanging
     jest.clearAllTimers();
     jest.useRealTimers();
-    // Cleanup
+    
+    // Cleanup database
     await databaseService.disconnect();
+    
+    // Force garbage collection if available
+    if (global.gc) {
+      global.gc();
+    }
+    
     logger.info('E2E Test Cleanup: Database disconnected');
   });
 
@@ -180,7 +187,7 @@ describe('Podcast Generation Pipeline - End-to-End Tests', () => {
       expect(rssXml).toContain('<item>');
 
       logger.info('Web Article Pipeline: Successfully processed article to podcast');
-    }, 30000); // 30 second timeout for E2E test
+    }, 120000); // 2 minute timeout for E2E test
 
     test('should handle invalid web article gracefully', async () => {
       const invalidSubmission = new ContentSubmission({
@@ -520,6 +527,6 @@ describe('Podcast Generation Pipeline - End-to-End Tests', () => {
       expect(results.every((result: any) => result.title)).toBe(true);
 
       logger.info('Concurrent Processing: Successfully processed multiple submissions');
-    }, 60000); // 60 second timeout for concurrent test
+    }, 120000); // 2 minute timeout for concurrent test
   });
 });

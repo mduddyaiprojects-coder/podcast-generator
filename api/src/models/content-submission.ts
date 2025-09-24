@@ -113,7 +113,11 @@ export class ContentSubmission {
     // Validate URL format for url and youtube types
     if (this.content_type === 'url' || this.content_type === 'youtube') {
       try {
-        new URL(this.content_url);
+        const url = new URL(this.content_url);
+        // Only allow http and https protocols
+        if (!['http:', 'https:'].includes(url.protocol)) {
+          throw new Error(`Invalid URL protocol: ${url.protocol}. Only HTTP and HTTPS are allowed`);
+        }
       } catch {
         throw new Error(`Invalid URL format: ${this.content_url}`);
       }
@@ -121,7 +125,7 @@ export class ContentSubmission {
 
     // Validate YouTube URL format
     if (this.content_type === 'youtube') {
-      const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|embed\/)|youtu\.be\/)[\w-]+/;
+      const youtubeRegex = /^(https?:\/\/)?(www\.|m\.)?(youtube\.com\/(watch\?v=|embed\/)|youtu\.be\/)[\w-]+/;
       if (!youtubeRegex.test(this.content_url)) {
         throw new Error(`Invalid YouTube URL format: ${this.content_url}`);
       }

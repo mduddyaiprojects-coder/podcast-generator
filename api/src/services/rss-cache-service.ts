@@ -509,6 +509,11 @@ export class RssCacheService {
     this.cleanupIntervalId = setInterval(() => {
       this.cleanupExpiredEntries();
     }, 5 * 60 * 1000); // Every 5 minutes
+    
+    // Unref to prevent Jest from hanging
+    if (this.cleanupIntervalId) {
+      this.cleanupIntervalId.unref();
+    }
   }
 
   /**

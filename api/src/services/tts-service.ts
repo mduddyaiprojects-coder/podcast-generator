@@ -86,6 +86,11 @@ export class TTSService {
     const startTime = Date.now();
     const mergedConfig = { ...this.defaultConfig, ...config };
     
+    // Validate input text
+    if (!text || text.trim().length === 0) {
+      throw new Error('Text input cannot be empty');
+    }
+    
     // Handle voice_id to voice_name mapping for Azure Speech
     if (config.voice_id && !config.voice_name) {
       mergedConfig.voice_name = config.voice_id;
