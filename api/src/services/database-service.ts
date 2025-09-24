@@ -97,7 +97,7 @@ export class DatabaseService {
   }
 
 
-  async saveEpisode(episode: PodcastEpisode): Promise<void> {
+  async saveEpisode(episode: PodcastEpisode): Promise<PodcastEpisode> {
     return this.executeQuery(async (client) => {
       const query = `
         INSERT INTO podcast_episodes (
@@ -128,6 +128,7 @@ export class DatabaseService {
 
       await client.query(query, values);
       logger.info('Episode saved to database:', episode.id);
+      return episode;
     });
   }
 

@@ -4,6 +4,7 @@ import { AzureOpenAIService } from './azure-openai-service';
 import { TTSService } from './tts-service';
 import { StorageService } from './storage-service';
 import { logger } from '../utils/logger';
+import { v4 as uuidv4 } from 'uuid';
 
 export class PodcastGenerator {
   private azureOpenAIService: AzureOpenAIService;
@@ -69,7 +70,7 @@ export class PodcastGenerator {
   }
 
   private generateEpisodeId(): string {
-    return `ep_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return uuidv4();
   }
 
   private estimateDuration(script: string): number {
