@@ -175,11 +175,11 @@
 
 ## 3.11 E2E Resolution Phase
 
-- [ ] T091 E2E Resolution Phase - Voice Name Mapping Issues (ROOT CAUSE)
-- [ ] T092 E2E Resolution Phase - Chapter Marker Duration Issues (ROOT CAUSE)
-- [ ] T093 E2E Resolution Phase - Test Timeout Issues (ROOT CAUSE)
-- [ ] T094 E2E Resolution Phase - Audio Generation Tests (5/13 passing)
-- [ ] T095 E2E Resolution Phase - Content Processing Tests (9/12 passing)
+- [x] T091 E2E Resolution Phase - Voice Name Mapping Issues (ROOT CAUSE)
+- [x] T092 E2E Resolution Phase - Chapter Marker Duration Issues (ROOT CAUSE)
+- [x] T093 E2E Resolution Phase - Test Timeout Issues (ROOT CAUSE)
+- [x] T094 E2E Resolution Phase - Audio Generation Tests (13/13 passing)
+- [x] T095 E2E Resolution Phase - Content Processing Tests (12/12 passing)
 - [ ] T096 E2E Resolution Phase - Podcast Generation Pipeline Tests (10/20 passing)
 - [ ] T097 E2E Resolution Phase - Content Validation Issues
 
