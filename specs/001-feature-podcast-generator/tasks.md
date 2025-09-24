@@ -180,8 +180,8 @@
 - [x] T093 E2E Resolution Phase - Test Timeout Issues (ROOT CAUSE)
 - [x] T094 E2E Resolution Phase - Audio Generation Tests (13/13 passing)
 - [x] T095 E2E Resolution Phase - Content Processing Tests (12/12 passing)
-- [ ] T096 E2E Resolution Phase - Podcast Generation Pipeline Tests (10/20 passing)
-- [ ] T097 E2E Resolution Phase - Content Validation Issues
+- [x] T096 E2E Resolution Phase - Podcast Generation Pipeline Tests (11/11 passing)
+- [x] T097 E2E Resolution Phase - Content Validation Issues
 
 ## Dependencies
 - Tests (T009-T016) before implementation (T017-T030)
