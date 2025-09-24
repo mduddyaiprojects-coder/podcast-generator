@@ -132,6 +132,40 @@ export class DatabaseService {
     });
   }
 
+  async updateEpisode(episodeId: string, updates: Partial<PodcastEpisode>): Promise<void> {
+    return this.executeQuery(async (client) => {
+      const fields = [];
+      const values = [];
+      let paramCount = 1;
+
+      if (updates.audio_url !== undefined) {
+        fields.push(`audio_url = $${paramCount++}`);
+        values.push(updates.audio_url);
+      }
+
+      if (updates.title !== undefined) {
+        fields.push(`title = $${paramCount++}`);
+        values.push(updates.title);
+      }
+
+      if (updates.description !== undefined) {
+        fields.push(`description = $${paramCount++}`);
+        values.push(updates.description);
+      }
+
+      if (fields.length === 0) {
+        throw new Error('No fields to update');
+      }
+
+      fields.push(`updated_at = NOW()`);
+      values.push(episodeId);
+
+      const query = `UPDATE podcast_episodes SET ${fields.join(', ')} WHERE id = $${paramCount}`;
+      await client.query(query, values);
+      logger.info(`Updated episode ${episodeId}`);
+    });
+  }
+
   async getEpisodes(limit?: number, offset?: number): Promise<PodcastEpisode[]> {
     return this.executeQuery(async (client) => {
       let query = `

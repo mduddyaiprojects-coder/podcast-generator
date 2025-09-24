@@ -1,6 +1,6 @@
 import { HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
-import { RssCacheService } from '../services/rss-cache-service';
 import { DatabaseService } from '../services/database-service';
+import { RssGenerator } from '../services/rss-generator';
 import { logger } from '../utils/logger';
 
 /**
@@ -9,7 +9,7 @@ import { logger } from '../utils/logger';
  * Generates and returns the RSS feed for the podcast with caching and performance optimization.
  * Since we're using a single public feed, the slug parameter is ignored.
  */
-export async function rssFeedFunction(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
+export async function rssFeedFunction(request: HttpRequest, _context: InvocationContext): Promise<HttpResponseInit> {
   const startTime = Date.now();
   
   try {
@@ -33,18 +33,41 @@ export async function rssFeedFunction(request: HttpRequest, context: InvocationC
     const options = parseRssOptions(request);
     
     // Initialize services
-    const rssCacheService = new RssCacheService();
     const databaseService = new DatabaseService();
 
     // Get episodes from database
-    const episodes = await databaseService.getEpisodes({
-      limit: options.maxEpisodes || 100,
-      sortBy: 'pub_date',
-      sortOrder: options.sortOrder || 'desc'
-    });
+    const episodes = await databaseService.getEpisodes(
+      options.maxEpisodes || 100,
+      0
+    );
 
-    // Get RSS feed with caching
-    const rssResult = await rssCacheService.getRssFeed(episodes, feedSlug, options);
+    // Get global feed metadata from database
+    const globalFeedResult = await databaseService['executeQuery'](async (client) => {
+      return await client.query('SELECT * FROM global_feed WHERE id = $1', ['00000000-0000-0000-0000-000000000000']);
+    });
+    const globalFeed = globalFeedResult.rows[0];
+
+    // Generate RSS feed with database metadata
+    const rssGenerator = new RssGenerator();
+    const rssContent = await rssGenerator.generateRss(episodes, {
+      title: globalFeed?.title || 'AI Podcast Generator',
+      description: globalFeed?.description || 'AI-generated podcast episodes from web content, YouTube videos, and documents',
+      link: 'https://podcast-gen-api.azurewebsites.net',
+      language: 'en-us',
+      author: globalFeed?.author || 'AI Podcast Generator',
+      email: globalFeed?.admin_email || 'admin@podcast-gen-api.azurewebsites.net',
+      category: globalFeed?.category || 'Technology',
+      explicit: false,
+      artwork_url: globalFeed?.artwork_url || undefined
+    });
+    
+    const rssResult = {
+      content: rssContent,
+      fromCache: false,
+      responseTime: Date.now() - startTime,
+      etag: `"${Date.now()}"`,
+      lastModified: new Date()
+    };
 
     // Set appropriate headers
     const headers: Record<string, string> = {
@@ -52,15 +75,8 @@ export async function rssFeedFunction(request: HttpRequest, context: InvocationC
       'Cache-Control': 'public, max-age=300, s-maxage=3600',
       'ETag': rssResult.etag,
       'Last-Modified': rssResult.lastModified.toUTCString(),
-      'X-Cache': rssResult.fromCache ? 'HIT' : 'MISS',
       'X-Response-Time': `${rssResult.responseTime}ms`
     };
-
-    // Add compression headers if content is compressed
-    if (options.compression !== false) {
-      headers['Content-Encoding'] = 'gzip';
-      headers['Vary'] = 'Accept-Encoding';
-    }
 
     logger.info('RSS feed generated successfully', {
       feedSlug,

@@ -266,7 +266,7 @@ export class StorageCostMonitoringService {
   /**
    * Calculate storage growth rate
    */
-  private calculateGrowthRate(currentStorageGB: number): number {
+  private calculateGrowthRate(_currentStorageGB: number): number {
     // This would typically compare with previous month's data
     // For now, return a mock growth rate
     return 15; // 15% growth

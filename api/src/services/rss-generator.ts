@@ -36,13 +36,13 @@ export class RssGenerator {
     this.defaultMetadata = {
       title: 'AI Podcast Generator',
       description: 'AI-generated podcast episodes from web content, YouTube videos, and documents',
-      link: 'https://podcast-generator.example.com',
+      link: 'https://podcast-gen-api.azurewebsites.net',
       language: 'en-us',
-      author: 'Podcast Generator',
-      email: 'admin@podcast-generator.example.com',
+      author: 'AI Podcast Generator',
+      email: 'admin@podcast-gen-api.azurewebsites.net',
       category: 'Technology',
       explicit: false,
-      artwork_url: 'https://podcast-generator.example.com/artwork.png'
+      artwork_url: undefined
     };
   }
 
@@ -92,10 +92,10 @@ export class RssGenerator {
     return this.generateRss(episodes, {
       title: 'AI Podcast Generator',
       description: 'AI-generated podcast episodes from web content, YouTube videos, and documents',
-      link: 'https://podcast-generator.example.com',
+      link: 'https://podcast-gen-api.azurewebsites.net',
       language: 'en-us',
       author: 'Podcast Generator',
-      email: 'admin@podcast-generator.example.com',
+      email: 'admin@podcast-gen-api.azurewebsites.net',
       category: 'Technology',
       explicit: false
     });

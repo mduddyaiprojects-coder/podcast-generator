@@ -54,7 +54,7 @@ app.http('status-check', {
 
 // RSS feed endpoint (T027)
 app.http('rss-feed', {
-    methods: ['GET'],
+    methods: ['GET', 'HEAD'],
     authLevel: 'anonymous',
     route: 'feeds/{slug}/rss.xml',
     handler: rssFeedFunction

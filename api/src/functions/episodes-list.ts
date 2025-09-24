@@ -1,4 +1,5 @@
 import { HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
+import { DatabaseService } from '../services/database-service';
 
 /**
  * GET /api/feeds/{slug}/episodes
@@ -49,23 +50,35 @@ export async function episodesListFunction(request: HttpRequest, context: Invoca
 
     context.log('Episodes list request received for slug:', feedSlug, 'limit:', limit, 'offset:', offset);
 
-    // For now, return a simple episodes list without database dependency
-    const episodes = generateSampleEpisodes(limit, offset);
+    // Get episodes from database
+    const databaseService = new DatabaseService();
+    const episodes = await databaseService.getEpisodes(limit, offset);
+    
+    // Convert episodes to the expected format
+    const formattedEpisodes = episodes.map(episode => ({
+      id: episode.id,
+      title: episode.title,
+      description: episode.description,
+      audioUrl: episode.audio_url,
+      duration: episode.getFormattedDuration(),
+      publishedAt: episode.pub_date.toISOString(),
+      slug: episode.id // Using ID as slug for now
+    }));
 
     return {
       status: 200,
       jsonBody: {
-        episodes,
+        episodes: formattedEpisodes,
         pagination: {
           limit,
           offset,
-          total: 1, // Sample total
-          hasMore: false
+          total: episodes.length,
+          hasMore: episodes.length === limit
         },
         feed: {
           slug: feedSlug,
-          title: 'Podcast Generator',
-          description: 'AI-generated podcast episodes'
+          title: 'AI Podcast Generator',
+          description: 'AI-generated podcast episodes from web content, YouTube videos, and documents'
         }
       }
     };
@@ -88,23 +101,4 @@ function isValidFeedSlug(slug: string): boolean {
   return /^[a-zA-Z0-9_-]+$/.test(slug);
 }
 
-function generateSampleEpisodes(limit: number, offset: number) {
-  // Generate sample episodes for testing
-  const episodes = [];
-  const now = new Date();
-  
-  for (let i = 0; i < Math.min(limit, 3); i++) {
-    const episodeDate = new Date(now.getTime() - (i + offset) * 24 * 60 * 60 * 1000);
-    episodes.push({
-      id: `episode-${i + offset + 1}`,
-      title: `Sample Episode ${i + offset + 1}`,
-      description: `This is a sample episode ${i + offset + 1} for testing purposes.`,
-      audioUrl: `https://podcast-generator.example.com/audio/episode-${i + offset + 1}.mp3`,
-      duration: '00:05:00',
-      publishedAt: episodeDate.toISOString(),
-      slug: `sample-episode-${i + offset + 1}`
-    });
-  }
-  
-  return episodes;
-}
+// Removed generateSampleEpisodes function - now using real database data

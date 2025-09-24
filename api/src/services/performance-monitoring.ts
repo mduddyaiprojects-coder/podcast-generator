@@ -4,7 +4,20 @@
  */
 
 import { logger } from '../utils/logger';
-import { PerformanceMetrics } from '../tests/utils/performance-test-utils';
+// import { PerformanceMetrics } from '../tests/utils/performance-test-utils';
+
+// Local interface to replace missing import
+export interface PerformanceMetrics {
+  responseTime: number;
+  throughput: number;
+  errorRate: number;
+  resourceUtilization: number;
+  timestamp: Date;
+  operation: string;
+  duration: number;
+  success: boolean;
+  metadata?: any;
+}
 
 export interface PerformanceAlert {
   id: string;

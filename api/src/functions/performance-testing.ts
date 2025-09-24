@@ -4,8 +4,21 @@
  */
 
 import { HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
-import { PerformanceTestUtils } from '../tests/utils/performance-test-utils';
-import { PERFORMANCE_BENCHMARKS, LOAD_TEST_CONFIGS } from '../tests/benchmarks/performance-benchmarks';
+// import { PerformanceTestUtils } from '../tests/utils/performance-test-utils';
+// import { PERFORMANCE_BENCHMARKS, LOAD_TEST_CONFIGS } from '../tests/benchmarks/performance-benchmarks';
+
+// Local constants to replace missing imports
+const PERFORMANCE_BENCHMARKS = {
+  file_upload: { name: 'File Upload', duration: 30000 },
+  file_download: { name: 'File Download', duration: 30000 },
+  file_processing: { name: 'File Processing', duration: 60000 }
+};
+
+const LOAD_TEST_CONFIGS = {
+  light: { concurrentUsers: 10, totalOperations: 100 },
+  medium: { concurrentUsers: 50, totalOperations: 500 },
+  heavy: { concurrentUsers: 100, totalOperations: 1000 }
+};
 import { PerformanceMonitoringService } from '../services/performance-monitoring';
 import { logger } from '../utils/logger';
 
@@ -17,14 +30,14 @@ const httpTrigger = async function (request: HttpRequest, _context: InvocationCo
     logger.info(`Performance testing request: ${method} ${action}`);
 
     // Initialize services
-    const performanceUtils = new PerformanceTestUtils();
+    // const performanceUtils = new PerformanceTestUtils();
     const monitoringService = new PerformanceMonitoringService();
 
     switch (method) {
       case 'GET':
-        return await handleGetRequest(request, performanceUtils, monitoringService, action);
+        return await handleGetRequest(request, null, monitoringService, action);
       case 'POST':
-        return await handlePostRequest(request, performanceUtils, monitoringService, action);
+        return await handlePostRequest(request, null, monitoringService, action);
       default:
         return {
           status: 405,
@@ -44,8 +57,8 @@ const httpTrigger = async function (request: HttpRequest, _context: InvocationCo
 };
 
 async function handleGetRequest(
-  request: HttpRequest,
-  performanceUtils: PerformanceTestUtils,
+  _request: HttpRequest,
+  _performanceUtils: any,
   monitoringService: PerformanceMonitoringService,
   action: string
 ): Promise<HttpResponseInit> {
@@ -105,7 +118,7 @@ async function handleGetRequest(
 
 async function handlePostRequest(
   request: HttpRequest,
-  performanceUtils: PerformanceTestUtils,
+  _performanceUtils: any,
   monitoringService: PerformanceMonitoringService,
   action: string
 ): Promise<HttpResponseInit> {

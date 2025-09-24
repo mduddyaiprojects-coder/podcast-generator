@@ -1,7 +1,7 @@
 import { AzureBlobStorageService } from './azure-blob-storage';
 import { getStorageConfig } from '../config/storage';
 import { logger } from '../utils/logger';
-import { BlobServiceClient, StorageSharedKeyCredential } from '@azure/storage-blob';
+import { BlobServiceClient } from '@azure/storage-blob';
 
 export interface LifecycleStats {
   totalFilesProcessed: number;

@@ -16,7 +16,7 @@ export class PodcastGenerator {
     this.ttsService = new TTSService();
     this.storageService = new StorageService({
       connectionString: process.env['AZURE_STORAGE_CONNECTION_STRING'] || '',
-      containerName: process.env['AZURE_STORAGE_CONTAINER_NAME'] || 'podcast-audio',
+      containerName: process.env['AZURE_STORAGE_CONTAINER_NAME'] || 'podcast-content',
       cdnBaseUrl: process.env['AZURE_CDN_BASE_URL']
     });
   }

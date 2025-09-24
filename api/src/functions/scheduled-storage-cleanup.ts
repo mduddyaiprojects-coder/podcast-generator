@@ -1,14 +1,14 @@
-import { TimerRequest, InvocationContext } from '@azure/functions';
+import { InvocationContext } from '@azure/functions';
 import { AzureBlobStorageService } from '../services/azure-blob-storage';
 import { StorageLifecycleService } from '../services/storage-lifecycle';
 import { StorageCostMonitoringService } from '../services/storage-cost-monitoring';
-import { logger } from '../utils/logger';
+// import { logger } from '../utils/logger'; // Unused
 
 /**
  * Scheduled function for automated storage cleanup and cost optimization
  * Runs daily at 2 AM UTC
  */
-export async function scheduledStorageCleanup(timer: TimerRequest, context: InvocationContext): Promise<void> {
+export async function scheduledStorageCleanup(_timer: any, context: InvocationContext): Promise<void> {
   const startTime = Date.now();
   context.log('Starting scheduled storage cleanup and cost optimization');
 
@@ -75,7 +75,7 @@ export async function scheduledStorageCleanup(timer: TimerRequest, context: Invo
     context.log(`Scheduled storage cleanup completed successfully in ${executionTime}ms`);
 
   } catch (error) {
-    context.log.error('Scheduled storage cleanup failed:', error);
+    context.log('Scheduled storage cleanup failed:', error);
     throw error;
   }
 }
