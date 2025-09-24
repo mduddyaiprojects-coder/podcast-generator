@@ -121,7 +121,7 @@ export class ContentSubmission {
 
     // Validate YouTube URL format
     if (this.content_type === 'youtube') {
-      const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[\w-]+/;
+      const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|embed\/)|youtu\.be\/)[\w-]+/;
       if (!youtubeRegex.test(this.content_url)) {
         throw new Error(`Invalid YouTube URL format: ${this.content_url}`);
       }

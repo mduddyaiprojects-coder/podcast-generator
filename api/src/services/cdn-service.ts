@@ -152,7 +152,7 @@ export class CdnService {
    */
   async createOrUpdateProfile(sku: 'Standard_Microsoft' | 'Standard_Akamai' | 'Standard_Verizon' | 'Premium_Verizon' = 'Standard_Microsoft'): Promise<void> {
     try {
-      await this.client.profiles.createOrUpdate(
+      await this.client.profiles.beginCreateAndWait(
         this.config.resourceGroupName,
         this.config.profileName,
         {
@@ -202,7 +202,7 @@ export class CdnService {
         ...config
       };
 
-      await this.client.endpoints.createOrUpdate(
+      await this.client.endpoints.beginCreateAndWait(
         this.config.resourceGroupName,
         this.config.profileName,
         this.config.endpointName,
@@ -218,7 +218,7 @@ export class CdnService {
             weight: 1000,
             enabled: true
           }],
-          isHttpsEnabled: defaultConfig.isHttpsEnabled,
+          // isHttpsEnabled: defaultConfig.isHttpsEnabled, // Property not available in current API version
           isHttpAllowed: defaultConfig.isHttpAllowed,
           queryStringCachingBehavior: defaultConfig.queryStringCachingBehavior,
           isCompressionEnabled: defaultConfig.compressionEnabled,
@@ -330,13 +330,13 @@ export class CdnService {
    */
   async purgeCache(config: CdnPurgeConfig): Promise<void> {
     try {
-      await this.client.endpoints.purgeContent(
+      await this.client.endpoints.beginPurgeContentAndWait(
         this.config.resourceGroupName,
         this.config.profileName,
         this.config.endpointName,
         {
-          contentPaths: config.contentPaths,
-          domains: config.domains
+          contentPaths: config.contentPaths
+          // domains: config.domains // Property not available in current API version
         }
       );
 

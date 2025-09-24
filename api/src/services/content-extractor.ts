@@ -1,6 +1,7 @@
 import { ContentSubmission, ContentSubmissionMetadata } from '../models/content-submission';
 import { FirecrawlService } from './firecrawl-service';
 import { AzureOpenAIService } from './azure-openai-service';
+import { YouTubeService } from './youtube-service';
 import { logger } from '../utils/logger';
 
 /**
@@ -46,10 +47,12 @@ export interface DocumentInfo {
 export class ContentExtractor {
   private firecrawlService: FirecrawlService;
   private azureOpenAIService: AzureOpenAIService;
+  private youtubeService: YouTubeService;
 
   constructor() {
     this.firecrawlService = new FirecrawlService();
     this.azureOpenAIService = new AzureOpenAIService();
+    this.youtubeService = new YouTubeService();
   }
 
   /**
@@ -310,18 +313,67 @@ export class ContentExtractor {
    * Get YouTube video information
    */
   private async getYouTubeVideoInfo(videoId: string): Promise<YouTubeVideoInfo> {
-    // TODO: Implement YouTube API integration
-    // For now, return mock data
-    logger.warn('YouTube API integration not implemented, using mock data');
+    try {
+      logger.info(`Getting YouTube video info for video ID: ${videoId}`);
+      
+      // Use the YouTube service to get video metadata
+      const videoMetadata = await this.youtubeService.getVideoMetadata(videoId);
+      
+      // Convert YouTube API response to our internal format
+      return {
+        title: videoMetadata.title,
+        description: videoMetadata.description,
+        duration: this.parseDurationToSeconds(videoMetadata.duration),
+        author: videoMetadata.channelTitle,
+        published_date: videoMetadata.publishedAt,
+        thumbnail_url: videoMetadata.thumbnailUrl
+      };
+    } catch (error) {
+      logger.error(`Failed to get YouTube video info for ${videoId}:`, error);
+      
+      // Fallback to mock data if API fails
+      logger.warn('YouTube API failed, using fallback data');
+      return {
+        title: `YouTube Video ${videoId}`,
+        description: 'Video description not available',
+        duration: 0,
+        author: 'Unknown Author',
+        published_date: new Date().toISOString(),
+        thumbnail_url: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
+      };
+    }
+  }
+
+  /**
+   * Parse duration string to seconds
+   * Handles both ISO 8601 format (PT4M13S) and human-readable format (4:13)
+   */
+  private parseDurationToSeconds(duration: string): number {
+    // If it's already in seconds (number string), return it
+    if (/^\d+$/.test(duration)) {
+      return parseInt(duration, 10);
+    }
     
-    return {
-      title: `YouTube Video ${videoId}`,
-      description: 'Video description not available',
-      duration: 0,
-      author: 'Unknown Author',
-      published_date: new Date().toISOString(),
-      thumbnail_url: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
-    };
+    // Parse ISO 8601 duration (e.g., "PT4M13S" = 4 minutes 13 seconds)
+    const isoMatch = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+    if (isoMatch) {
+      const hours = parseInt(isoMatch[1] || '0', 10);
+      const minutes = parseInt(isoMatch[2] || '0', 10);
+      const seconds = parseInt(isoMatch[3] || '0', 10);
+      return hours * 3600 + minutes * 60 + seconds;
+    }
+    
+    // Parse human-readable format (e.g., "4:13" or "1:23:45")
+    const timeMatch = duration.match(/^(?:(\d+):)?(\d+):(\d+)$/);
+    if (timeMatch) {
+      const hours = parseInt(timeMatch[1] || '0', 10);
+      const minutes = parseInt(timeMatch[2] || '0', 10);
+      const seconds = parseInt(timeMatch[3] || '0', 10);
+      return hours * 3600 + minutes * 60 + seconds;
+    }
+    
+    // If no format matches, return 0
+    return 0;
   }
 
   /**

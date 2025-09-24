@@ -99,18 +99,13 @@ export class ErrorHandler {
     }
     
     // Create error response
-    const errorResponse = this.createErrorResponse(
+    return this.createErrorResponse(
       errorInfo.type,
       errorInfo.message,
       errorInfo.status,
       errorInfo.details,
       requestId
     );
-    
-    return {
-      status: errorInfo.status,
-      jsonBody: errorResponse
-    };
   }
 
   /**

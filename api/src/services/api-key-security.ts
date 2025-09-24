@@ -32,6 +32,8 @@ export class ApiKeySecurityService {
   private alerts: SecurityAlert[] = [];
   private validationCache: Map<string, ApiKeyValidationResult> = new Map();
   private readonly CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+  private intervalId?: NodeJS.Timeout;
+  private timeoutId?: NodeJS.Timeout;
 
   constructor() {
     // Start periodic validation
@@ -268,7 +270,7 @@ export class ApiKeySecurityService {
    */
   private startPeriodicValidation(): void {
     // Validate all keys every 5 minutes
-    setInterval(async () => {
+    this.intervalId = setInterval(async () => {
       try {
         await this.validateAllApiKeys();
         await this.checkCredentialRotation();
@@ -280,7 +282,7 @@ export class ApiKeySecurityService {
     }, 5 * 60 * 1000);
 
     // Initial validation
-    setTimeout(async () => {
+    this.timeoutId = setTimeout(async () => {
       try {
         await this.validateAllApiKeys();
         await this.checkCredentialRotation();
@@ -288,6 +290,20 @@ export class ApiKeySecurityService {
         logger.error('Error in initial security validation', error);
       }
     }, 1000);
+  }
+
+  /**
+   * Clean up timers and resources
+   */
+  cleanup(): void {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+      this.intervalId = undefined;
+    }
+    if (this.timeoutId) {
+      clearTimeout(this.timeoutId);
+      this.timeoutId = undefined;
+    }
   }
 
   /**
@@ -341,3 +357,10 @@ export class ApiKeySecurityService {
 
 // Export singleton instance
 export const apiKeySecurityService = new ApiKeySecurityService();
+
+/**
+ * Global cleanup function for tests
+ */
+export function cleanupApiKeySecurityService(): void {
+  apiKeySecurityService.cleanup();
+}

@@ -1,261 +1,572 @@
-import { describe, it, expect, beforeEach } from '@jest/globals';
-import { ContentSubmission } from '../../src/models/content-submission';
+import { ContentSubmission, ContentSubmissionData, ContentSubmissionMetadata, ContentType, SubmissionStatus } from '../../src/models/content-submission';
 
-describe('ContentSubmission Model', () => {
-  let submission: ContentSubmission;
+// Mock timers to control Date.now() for testing
+jest.useFakeTimers();
 
-  beforeEach(() => {
-    submission = new ContentSubmission({
-      content_url: 'https://example.com/article',
-      content_type: 'url',
-      user_note: 'Test submission',
-      source: 'web'
-    });
-  });
+describe('ContentSubmission', () => {
+  const validSubmissionData: ContentSubmissionData = {
+    content_url: 'https://example.com/article',
+    content_type: 'url'
+  };
 
-  describe('Constructor and Basic Properties', () => {
-    it('should create a ContentSubmission with valid data', () => {
-      expect(submission.id).toBeDefined();
+  const validMetadata: ContentSubmissionMetadata = {
+    title: 'Test Article',
+    author: 'Test Author',
+    published_date: '2023-01-01',
+    word_count: 1000,
+    reading_time: 5,
+    language: 'en',
+    extraction_method: 'firecrawl',
+    extraction_quality: 0.95
+  };
+
+  const validDeviceInfo = {
+    platform: 'iOS',
+    version: '17.0',
+    app: 'PodcastGenerator',
+    share_extension_version: '1.0.0',
+    shortcut_name: 'Create Podcast',
+    shortcut_version: '1.0.0'
+  };
+
+  describe('constructor', () => {
+    it('should create submission with minimal required data', () => {
+      const submission = new ContentSubmission(validSubmissionData);
+
       expect(submission.content_url).toBe('https://example.com/article');
       expect(submission.content_type).toBe('url');
-      expect(submission.user_note).toBe('Test submission');
-      expect(submission.source).toBe('web');
       expect(submission.status).toBe('pending');
+      expect(submission.id).toBeDefined();
       expect(submission.created_at).toBeInstanceOf(Date);
+      expect(submission.updated_at).toBeInstanceOf(Date);
     });
 
-    it('should generate a valid UUID for id', () => {
-      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-      expect(submission.id).toMatch(uuidRegex);
+    it('should create submission with all optional data', () => {
+      const fullData: ContentSubmissionData = {
+        id: 'test-id-123',
+        content_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        content_type: 'youtube',
+        user_note: 'Test note',
+        status: 'completed',
+        error_message: undefined,
+        extracted_content: 'Extracted content here',
+        metadata: validMetadata,
+        created_at: new Date('2023-01-01'),
+        updated_at: new Date('2023-01-01'),
+        processed_at: new Date('2023-01-01'),
+        source: 'ios_share',
+        device_info: validDeviceInfo
+      };
+
+      const submission = new ContentSubmission(fullData);
+
+      expect(submission.id).toBe('test-id-123');
+      expect(submission.user_note).toBe('Test note');
+      expect(submission.status).toBe('completed');
+      expect(submission.extracted_content).toBe('Extracted content here');
+      expect(submission.metadata).toEqual(validMetadata);
+      expect(submission.processed_at).toEqual(new Date('2023-01-01'));
+      expect(submission.source).toBe('ios_share');
+      expect(submission.device_info).toEqual(validDeviceInfo);
     });
 
-    it('should set default values correctly', () => {
-      expect(submission.status).toBe('pending');
-      expect(submission.created_at).toBeInstanceOf(Date);
-      expect(submission.error_message).toBeUndefined();
-      expect(submission.processed_at).toBeUndefined();
-      expect(submission.extracted_content).toBeUndefined();
-      expect(submission.metadata).toBeUndefined();
+    it('should generate UUID when no ID provided', () => {
+      const submission = new ContentSubmission(validSubmissionData);
+      expect(submission.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+    });
+
+    it('should set default dates when not provided', () => {
+      const submission = new ContentSubmission(validSubmissionData);
+      const now = new Date();
+      
+      expect(submission.created_at.getTime()).toBeLessThanOrEqual(now.getTime());
+      expect(submission.updated_at.getTime()).toBeLessThanOrEqual(now.getTime());
     });
   });
 
-  describe('Validation', () => {
-    it('should validate required fields', () => {
-      expect(() => new ContentSubmission({
-        content_url: '',
-        content_type: 'url'
-      })).toThrow('Content URL is required');
-
-      expect(() => new ContentSubmission({
-        content_url: 'https://example.com',
-        content_type: '' as any
-      })).toThrow('Invalid content type');
+  describe('validation', () => {
+    it('should throw error for empty content_url', () => {
+      expect(() => new ContentSubmission({ ...validSubmissionData, content_url: '' }))
+        .toThrow('Content URL is required');
     });
 
-    it('should validate URL format', () => {
-      expect(() => new ContentSubmission({
-        content_url: 'not-a-url',
-        content_type: 'url'
-      })).toThrow('Invalid URL format');
+    it('should throw error for whitespace-only content_url', () => {
+      expect(() => new ContentSubmission({ ...validSubmissionData, content_url: '   ' }))
+        .toThrow('Content URL is required');
     });
 
-    it('should validate content type', () => {
-      expect(() => new ContentSubmission({
-        content_url: 'https://example.com',
-        content_type: 'invalid-type' as any
-      })).toThrow('Invalid content type');
+    it('should throw error for invalid content_type', () => {
+      expect(() => new ContentSubmission({ ...validSubmissionData, content_type: 'invalid' as ContentType }))
+        .toThrow('Invalid content type: invalid. Must be one of: url, youtube, pdf, document');
     });
 
-    it('should accept long user notes', () => {
-      const longNote = 'a'.repeat(1001);
-      const submission = new ContentSubmission({
-        content_url: 'https://example.com',
-        content_type: 'url',
-        user_note: longNote
+    it('should throw error for invalid status', () => {
+      expect(() => new ContentSubmission({ ...validSubmissionData, status: 'invalid' as SubmissionStatus }))
+        .toThrow('Invalid status: invalid. Must be one of: pending, processing, completed, failed');
+    });
+
+    it('should throw error for failed status without error message', () => {
+      expect(() => new ContentSubmission({ 
+        ...validSubmissionData, 
+        status: 'failed',
+        processed_at: new Date()
+      })).toThrow('Error message is required when status is "failed"');
+    });
+
+    it('should throw error for completed status without processed_at', () => {
+      expect(() => new ContentSubmission({ 
+        ...validSubmissionData, 
+        status: 'completed'
+      })).toThrow('Processed timestamp is required when status is "completed" or "failed"');
+    });
+
+    it('should throw error for failed status without processed_at', () => {
+      expect(() => new ContentSubmission({ 
+        ...validSubmissionData, 
+        status: 'failed',
+        error_message: 'Test error'
+      })).toThrow('Processed timestamp is required when status is "completed" or "failed"');
+    });
+
+    it('should throw error for invalid URL format', () => {
+      expect(() => new ContentSubmission({ 
+        ...validSubmissionData, 
+        content_url: 'not-a-url'
+      })).toThrow('Invalid URL format: not-a-url');
+    });
+
+    it('should throw error for invalid YouTube URL format', () => {
+      expect(() => new ContentSubmission({ 
+        ...validSubmissionData, 
+        content_type: 'youtube',
+        content_url: 'https://example.com/not-youtube'
+      })).toThrow('Invalid YouTube URL format: https://example.com/not-youtube');
+    });
+
+    it('should accept valid YouTube URL formats', () => {
+      const validYouTubeUrls = [
+        'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        'https://youtu.be/dQw4w9WgXcQ',
+        'http://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        'http://youtu.be/dQw4w9WgXcQ'
+      ];
+
+      validYouTubeUrls.forEach(url => {
+        expect(() => new ContentSubmission({ 
+          ...validSubmissionData, 
+          content_type: 'youtube',
+          content_url: url
+        })).not.toThrow();
       });
-      expect(submission.user_note).toBe(longNote);
     });
 
-    it('should validate status transitions', () => {
-      expect(() => submission.updateStatus('invalid-status' as any)).toThrow('Invalid status');
+    it('should accept valid content types', () => {
+      const validTypes: ContentType[] = ['url', 'pdf', 'document'];
+      
+      validTypes.forEach(type => {
+        expect(() => new ContentSubmission({ ...validSubmissionData, content_type: type }))
+          .not.toThrow();
+      });
+
+      // Test YouTube separately with valid YouTube URL
+      expect(() => new ContentSubmission({ 
+        ...validSubmissionData, 
+        content_type: 'youtube',
+        content_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+      })).not.toThrow();
     });
   });
 
-  describe('Status Management', () => {
-    it('should update status correctly', () => {
+  describe('updateStatus', () => {
+    let submission: ContentSubmission;
+
+    beforeEach(() => {
+      submission = new ContentSubmission(validSubmissionData);
+      jest.advanceTimersByTime(1);
+    });
+
+    it('should update status from pending to processing', () => {
       const updated = submission.updateStatus('processing');
+
       expect(updated.status).toBe('processing');
-      expect(updated).not.toBe(submission); // Should return new instance
+      expect(updated.updated_at).not.toEqual(submission.updated_at);
+      expect(updated.id).toBe(submission.id);
     });
 
-    it('should validate status transitions', () => {
-      const processing = submission.updateStatus('processing');
-      const completed = processing.updateStatus('completed');
-      
-      expect(completed.status).toBe('completed');
-      expect(completed.processed_at).toBeInstanceOf(Date);
+    it('should update status from pending to failed with error message', () => {
+      const updated = submission.updateStatus('failed', 'Test error');
+
+      expect(updated.status).toBe('failed');
+      expect(updated.error_message).toBe('Test error');
+      expect(updated.processed_at).toBeDefined();
+      expect(updated.updated_at).not.toEqual(submission.updated_at);
     });
 
-    it('should not allow invalid status transitions', () => {
-      expect(() => submission.updateStatus('completed')).toThrow('Invalid status transition');
+    it('should update status from processing to completed', () => {
+      const processingSubmission = submission.updateStatus('processing');
+      jest.advanceTimersByTime(1); // Ensure different timestamp
+      const updated = processingSubmission.updateStatus('completed');
+
+      expect(updated.status).toBe('completed');
+      expect(updated.processed_at).toBeDefined();
+      expect(updated.updated_at).not.toEqual(processingSubmission.updated_at);
+    });
+
+    it('should throw error for invalid status transition from pending to completed', () => {
+      expect(() => submission.updateStatus('completed'))
+        .toThrow('Invalid status transition from pending to completed');
+    });
+
+    it('should throw error for invalid status transition from completed to processing', () => {
+      const completedSubmission = new ContentSubmission({
+        ...validSubmissionData,
+        status: 'completed',
+        processed_at: new Date()
+      });
+
+      expect(() => completedSubmission.updateStatus('processing'))
+        .toThrow('Invalid status transition from completed to processing');
+    });
+
+    it('should throw error for invalid status transition from failed to processing', () => {
+      const failedSubmission = new ContentSubmission({
+        ...validSubmissionData,
+        status: 'failed',
+        error_message: 'Test error',
+        processed_at: new Date()
+      });
+
+      expect(() => failedSubmission.updateStatus('processing'))
+        .toThrow('Invalid status transition from failed to processing');
     });
   });
 
-  describe('Content Extraction', () => {
+  describe('updateExtractedContent', () => {
+    let submission: ContentSubmission;
+
+    beforeEach(() => {
+      submission = new ContentSubmission(validSubmissionData);
+      jest.advanceTimersByTime(1);
+    });
+
     it('should update extracted content', () => {
-      const extractedContent = 'Test extracted content...';
+      const updated = submission.updateExtractedContent('New extracted content');
 
-      const updated = submission.updateExtractedContent(extractedContent);
-      expect(updated.extracted_content).toBe(extractedContent);
-      expect(updated).not.toBe(submission);
+      expect(updated.extracted_content).toBe('New extracted content');
+      expect(updated.updated_at).not.toEqual(submission.updated_at);
+      expect(updated.id).toBe(submission.id);
     });
   });
 
-  describe('Metadata Management', () => {
+  describe('updateMetadata', () => {
+    let submission: ContentSubmission;
+
+    beforeEach(() => {
+      submission = new ContentSubmission(validSubmissionData);
+      jest.advanceTimersByTime(1);
+    });
+
     it('should update metadata', () => {
-      const metadata = {
-        source_domain: 'example.com',
-        extraction_method: 'firecrawl',
-        quality_score: 0.95
+      const newMetadata: ContentSubmissionMetadata = {
+        title: 'Updated Title',
+        author: 'Updated Author'
       };
 
-      const updated = submission.updateMetadata(metadata);
-      expect(updated.metadata).toEqual(metadata);
-      expect(updated).not.toBe(submission);
+      const updated = submission.updateMetadata(newMetadata);
+
+      expect(updated.metadata).toEqual(newMetadata);
+      expect(updated.updated_at).not.toEqual(submission.updated_at);
+      expect(updated.id).toBe(submission.id);
     });
 
-    it('should merge metadata', () => {
-      const initialMetadata = { source_domain: 'example.com' };
-      const submissionWithMetadata = submission.updateMetadata(initialMetadata);
-      
-      const additionalMetadata = { quality_score: 0.95 };
-      const updated = submissionWithMetadata.updateMetadata(additionalMetadata);
-      
+    it('should merge with existing metadata', () => {
+      const submissionWithMetadata = new ContentSubmission({
+        ...validSubmissionData,
+        metadata: { title: 'Original Title', word_count: 1000 }
+      });
+
+      const newMetadata: ContentSubmissionMetadata = {
+        title: 'Updated Title',
+        author: 'New Author'
+      };
+
+      const updated = submissionWithMetadata.updateMetadata(newMetadata);
+
       expect(updated.metadata).toEqual({
-        source_domain: 'example.com',
-        quality_score: 0.95
+        title: 'Updated Title',
+        word_count: 1000,
+        author: 'New Author'
       });
     });
   });
 
-  describe('Utility Methods', () => {
-    it('should get title from metadata', () => {
-      const metadata = {
-        title: 'Test Article',
-        author: 'Test Author',
-        word_count: 100,
-        reading_time: 1,
-        language: 'en'
-      };
+  describe('utility methods', () => {
+    describe('getTitle', () => {
+      it('should return title from metadata', () => {
+        const submission = new ContentSubmission({
+          ...validSubmissionData,
+          metadata: { title: 'Metadata Title' }
+        });
 
-      const updated = submission.updateMetadata(metadata);
-      expect(updated.getTitle()).toBe('Test Article');
+        expect(submission.getTitle()).toBe('Metadata Title');
+      });
+
+      it('should return YouTube Video for YouTube content type', () => {
+        const submission = new ContentSubmission({
+          ...validSubmissionData,
+          content_type: 'youtube',
+          content_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+        });
+
+        expect(submission.getTitle()).toBe('YouTube Video');
+      });
+
+      it('should return filename for PDF content type', () => {
+        const submission = new ContentSubmission({
+          ...validSubmissionData,
+          content_type: 'pdf',
+          content_url: 'https://example.com/document.pdf'
+        });
+
+        expect(submission.getTitle()).toBe('document.pdf');
+      });
+
+      it('should return filename for document content type', () => {
+        const submission = new ContentSubmission({
+          ...validSubmissionData,
+          content_type: 'document',
+          content_url: 'https://example.com/document.docx'
+        });
+
+        expect(submission.getTitle()).toBe('document.docx');
+      });
+
+      it('should return hostname for URL content type', () => {
+        const submission = new ContentSubmission({
+          ...validSubmissionData,
+          content_type: 'url',
+          content_url: 'https://example.com/article'
+        });
+
+        expect(submission.getTitle()).toBe('example.com');
+      });
+
+      it('should return full URL if URL parsing fails', () => {
+        // Create a submission with valid URL first, then manually set invalid URL to bypass validation
+        const submission = new ContentSubmission(validSubmissionData);
+        (submission as any).content_url = 'invalid-url';
+        (submission as any).content_type = 'url';
+
+        expect(submission.getTitle()).toBe('invalid-url');
+      });
     });
 
-    it('should get author from metadata', () => {
-      const metadata = {
-        title: 'Test Article',
-        author: 'Test Author',
-        word_count: 100,
-        reading_time: 1,
-        language: 'en'
-      };
+    describe('getAuthor', () => {
+      it('should return author from metadata', () => {
+        const submission = new ContentSubmission({
+          ...validSubmissionData,
+          metadata: { author: 'Test Author' }
+        });
 
-      const updated = submission.updateMetadata(metadata);
-      expect(updated.getAuthor()).toBe('Test Author');
+        expect(submission.getAuthor()).toBe('Test Author');
+      });
+
+      it('should return undefined when no author in metadata', () => {
+        const submission = new ContentSubmission(validSubmissionData);
+        expect(submission.getAuthor()).toBeUndefined();
+      });
     });
 
-    it('should calculate word count from metadata', () => {
-      const metadata = {
-        title: 'Test Article',
-        author: 'Test Author',
-        word_count: 150,
-        reading_time: 1,
-        language: 'en'
-      };
+    describe('getWordCount', () => {
+      it('should return word count from metadata', () => {
+        const submission = new ContentSubmission({
+          ...validSubmissionData,
+          metadata: { word_count: 1500 }
+        });
 
-      const updated = submission.updateMetadata(metadata);
-      expect(updated.getWordCount()).toBe(150);
+        expect(submission.getWordCount()).toBe(1500);
+      });
+
+      it('should return undefined when no word count in metadata', () => {
+        const submission = new ContentSubmission(validSubmissionData);
+        expect(submission.getWordCount()).toBeUndefined();
+      });
     });
 
-    it('should calculate reading time from metadata', () => {
-      const metadata = {
-        title: 'Test Article',
-        author: 'Test Author',
-        word_count: 300,
-        reading_time: 2,
-        language: 'en'
-      };
+    describe('getReadingTime', () => {
+      it('should return reading time from metadata', () => {
+        const submission = new ContentSubmission({
+          ...validSubmissionData,
+          metadata: { reading_time: 8 }
+        });
 
-      const updated = submission.updateMetadata(metadata);
-      expect(updated.getReadingTime()).toBe(2);
+        expect(submission.getReadingTime()).toBe(8);
+      });
+
+      it('should return undefined when no reading time in metadata', () => {
+        const submission = new ContentSubmission(validSubmissionData);
+        expect(submission.getReadingTime()).toBeUndefined();
+      });
     });
 
-    it('should check if status is terminal', () => {
-      expect(submission.isTerminal()).toBe(false);
-      
-      const processing = submission.updateStatus('processing');
-      const completed = processing.updateStatus('completed');
-      expect(completed.isTerminal()).toBe(true);
-      
-      const failed = submission.updateStatus('failed', 'Processing failed');
-      expect(failed.isTerminal()).toBe(true);
+    describe('isTerminal', () => {
+      it('should return true for completed status', () => {
+        const submission = new ContentSubmission({
+          ...validSubmissionData,
+          status: 'completed',
+          processed_at: new Date()
+        });
+
+        expect(submission.isTerminal()).toBe(true);
+      });
+
+      it('should return true for failed status', () => {
+        const submission = new ContentSubmission({
+          ...validSubmissionData,
+          status: 'failed',
+          error_message: 'Test error',
+          processed_at: new Date()
+        });
+
+        expect(submission.isTerminal()).toBe(true);
+      });
+
+      it('should return false for pending status', () => {
+        const submission = new ContentSubmission(validSubmissionData);
+        expect(submission.isTerminal()).toBe(false);
+      });
+
+      it('should return false for processing status', () => {
+        const submission = new ContentSubmission({
+          ...validSubmissionData,
+          status: 'processing'
+        });
+
+        expect(submission.isTerminal()).toBe(false);
+      });
     });
 
-    it('should check if status is processing', () => {
-      expect(submission.isProcessing()).toBe(false);
-      
-      const processing = submission.updateStatus('processing');
-      expect(processing.isProcessing()).toBe(true);
+    describe('isProcessing', () => {
+      it('should return true for processing status', () => {
+        const submission = new ContentSubmission({
+          ...validSubmissionData,
+          status: 'processing'
+        });
+
+        expect(submission.isProcessing()).toBe(true);
+      });
+
+      it('should return false for other statuses', () => {
+        const statuses: SubmissionStatus[] = ['pending', 'completed', 'failed'];
+        
+        statuses.forEach(status => {
+          const submission = new ContentSubmission({
+            ...validSubmissionData,
+            status,
+            ...(status === 'completed' || status === 'failed' ? { processed_at: new Date() } : {}),
+            ...(status === 'failed' ? { error_message: 'Test error' } : {})
+          });
+
+          expect(submission.isProcessing()).toBe(false);
+        });
+      });
     });
 
-    it('should calculate processing duration', () => {
-      const processing = submission.updateStatus('processing');
-      // Wait a small amount to ensure duration > 0
-      setTimeout(() => {
-        const completed = processing.updateStatus('completed');
-        const duration = completed.getProcessingDuration();
-        expect(duration).toBeGreaterThan(0);
-      }, 10);
+    describe('getProcessingDuration', () => {
+      it('should return processing duration in milliseconds', () => {
+        const created = new Date('2023-01-01T10:00:00Z');
+        const processed = new Date('2023-01-01T10:05:00Z');
+        
+        const submission = new ContentSubmission({
+          ...validSubmissionData,
+          status: 'completed',
+          created_at: created,
+          processed_at: processed
+        });
+
+        expect(submission.getProcessingDuration()).toBe(300000); // 5 minutes in milliseconds
+      });
+
+      it('should return undefined when not processed', () => {
+        const submission = new ContentSubmission(validSubmissionData);
+        expect(submission.getProcessingDuration()).toBeUndefined();
+      });
     });
   });
 
-  describe('JSON Serialization', () => {
-    it('should serialize to JSON correctly', () => {
+  describe('toJSON and fromJSON', () => {
+    it('should convert to JSON correctly', () => {
+      const submission = new ContentSubmission({
+        ...validSubmissionData,
+        id: 'test-id',
+        user_note: 'Test note',
+        status: 'completed',
+        extracted_content: 'Test content',
+        metadata: validMetadata,
+        processed_at: new Date('2023-01-01'),
+        source: 'ios_share',
+        device_info: validDeviceInfo
+      });
+
       const json = submission.toJSON();
-      expect(json).toHaveProperty('id');
-      expect(json).toHaveProperty('content_url');
-      expect(json).toHaveProperty('content_type');
-      expect(json).toHaveProperty('status');
-      expect(json).toHaveProperty('created_at');
+
+      expect(json.id).toBe('test-id');
+      expect(json.content_url).toBe('https://example.com/article');
+      expect(json.user_note).toBe('Test note');
+      expect(json.status).toBe('completed');
+      expect(json.metadata).toEqual(validMetadata);
+      expect(json.device_info).toEqual(validDeviceInfo);
     });
 
-    it('should deserialize from JSON correctly', () => {
-      const json = submission.toJSON();
-      const deserialized = ContentSubmission.fromJSON(json);
-      
-      expect(deserialized.id).toBe(submission.id);
-      expect(deserialized.content_url).toBe(submission.content_url);
-      expect(deserialized.content_type).toBe(submission.content_type);
-      expect(deserialized.status).toBe(submission.status);
+    it('should create from JSON correctly', () => {
+      const jsonData: ContentSubmissionData = {
+        id: 'test-id',
+        content_url: 'https://example.com/article',
+        content_type: 'url',
+        user_note: 'Test note',
+        status: 'completed',
+        extracted_content: 'Test content',
+        metadata: validMetadata,
+        created_at: new Date('2023-01-01'),
+        updated_at: new Date('2023-01-01'),
+        processed_at: new Date('2023-01-01'),
+        source: 'ios_share',
+        device_info: validDeviceInfo
+      };
+
+      const submission = ContentSubmission.fromJSON(jsonData);
+
+      expect(submission.id).toBe('test-id');
+      expect(submission.content_url).toBe('https://example.com/article');
+      expect(submission.user_note).toBe('Test note');
+      expect(submission.status).toBe('completed');
+      expect(submission.metadata).toEqual(validMetadata);
+      expect(submission.device_info).toEqual(validDeviceInfo);
     });
   });
 
-  describe('Error Handling', () => {
-    it('should handle error messages', () => {
-      const errorMessage = 'Processing failed';
-      const failed = submission.updateStatus('failed', errorMessage);
-      
-      expect(failed.status).toBe('failed');
-      expect(failed.error_message).toBe(errorMessage);
+  describe('device info handling', () => {
+    it('should handle partial device info', () => {
+      const partialDeviceInfo = {
+        platform: 'iOS',
+        version: '17.0'
+      };
+
+      const submission = new ContentSubmission({
+        ...validSubmissionData,
+        device_info: partialDeviceInfo
+      });
+
+      expect(submission.device_info).toEqual(partialDeviceInfo);
     });
 
-    it('should clear error message on successful status update', () => {
-      const processing = submission.updateStatus('processing');
-      const completed = processing.updateStatus('completed');
-      
-      // Error message should be undefined for completed status
-      expect(completed.error_message).toBeUndefined();
+    it('should handle empty device info', () => {
+      const submission = new ContentSubmission({
+        ...validSubmissionData,
+        device_info: {}
+      });
+
+      expect(submission.device_info).toEqual({});
     });
   });
 });

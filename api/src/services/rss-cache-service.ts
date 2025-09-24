@@ -1,5 +1,4 @@
 import { CdnCacheManagementService } from './cdn-cache-management';
-import { CdnInvalidationTriggersService } from './cdn-invalidation-triggers';
 import { logger } from '../utils/logger';
 import { PodcastEpisode } from '../models/podcast-episode';
 import { RssGenerator } from './rss-generator';
@@ -58,10 +57,10 @@ export interface RssCacheOptions {
 export class RssCacheService {
   private cache: Map<string, RssCacheEntry> = new Map();
   private cdnCacheService: CdnCacheManagementService;
-  private invalidationService: CdnInvalidationTriggersService;
   private rssGenerator: RssGenerator;
   private config: RssCacheConfig;
   private stats: RssCacheStats;
+  private cleanupIntervalId?: NodeJS.Timeout;
 
   constructor() {
     this.config = {
@@ -74,7 +73,6 @@ export class RssCacheService {
     };
 
     this.cdnCacheService = new CdnCacheManagementService();
-    this.invalidationService = new CdnInvalidationTriggersService();
     this.rssGenerator = new RssGenerator();
 
     this.stats = {
@@ -196,7 +194,7 @@ export class RssCacheService {
       const keysToInvalidate: string[] = [];
       
       // Find all cache keys for this feed
-      for (const [key, entry] of this.cache.entries()) {
+      for (const [key] of this.cache.entries()) {
         if (key.startsWith(`${this.config.cacheKeyPrefix}${feedSlug}:`)) {
           keysToInvalidate.push(key);
         }
@@ -231,7 +229,7 @@ export class RssCacheService {
 
       return {
         success: true,
-        invalidatedKeys
+        invalidatedKeys: keysToInvalidate
       };
     } catch (error) {
       logger.error('Failed to invalidate RSS cache', { error, feedSlug, reason });
@@ -508,9 +506,19 @@ export class RssCacheService {
    * Start cleanup interval
    */
   private startCleanupInterval(): void {
-    setInterval(() => {
+    this.cleanupIntervalId = setInterval(() => {
       this.cleanupExpiredEntries();
     }, 5 * 60 * 1000); // Every 5 minutes
+  }
+
+  /**
+   * Clean up timers and resources
+   */
+  cleanup(): void {
+    if (this.cleanupIntervalId) {
+      clearInterval(this.cleanupIntervalId);
+      this.cleanupIntervalId = undefined;
+    }
   }
 
   /**

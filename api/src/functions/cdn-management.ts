@@ -315,3 +315,5 @@ async function handleDeleteRequest(
 
 export { httpTrigger };
 
+
+

@@ -1,5 +1,4 @@
 import { logger } from '../utils/logger';
-import { AzureOpenAI } from 'openai';
 import { environmentService } from '../config/environment';
 import { apiKeySecurityService } from './api-key-security';
 
@@ -18,7 +17,6 @@ export interface AzureOpenAIConfig {
 }
 
 export class AzureOpenAIService {
-  private client!: AzureOpenAI;
   private config: AzureOpenAIConfig;
   private isHealthy: boolean = true;
 
@@ -37,13 +35,6 @@ export class AzureOpenAIService {
     } else {
       // Validate API key security
       this.validateApiKeySecurity();
-      
-      this.client = new AzureOpenAI({
-        endpoint: this.config.endpoint,
-        apiKey: this.config.apiKey,
-        apiVersion: this.config.apiVersion,
-        deployment: this.config.deploymentName
-      });
     }
   }
 
@@ -87,15 +78,28 @@ export class AzureOpenAIService {
         }
       ];
 
-      const response = await this.client.chat.completions.create({
-        model: this.config.deploymentName,
-        messages,
-        max_tokens: 200,
-        temperature: 0.7,
-        top_p: 0.9
+      const response = await fetch(`${this.config.endpoint}openai/deployments/${this.config.deploymentName}/chat/completions?api-version=${this.config.apiVersion}`, {
+        method: 'POST',
+        headers: {
+          'api-key': this.config.apiKey,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          messages,
+          max_tokens: 200,
+          temperature: 0.7,
+          top_p: 0.9
+        })
       });
 
-      const summary = response.choices[0]?.message?.content?.trim();
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Azure OpenAI API error: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+
+      const result = await response.json() as any;
+
+      const summary = result.choices[0]?.message?.content?.trim();
       
       if (!summary) {
         throw new Error('No summary generated from Azure OpenAI');
@@ -151,15 +155,31 @@ Please create an engaging podcast script that covers the main points of this con
         }
       ];
 
-      const response = await this.client.chat.completions.create({
-        model: this.config.deploymentName,
-        messages,
-        max_tokens: 800,
-        temperature: 0.8,
-        top_p: 0.9
+      const url = `${this.config.endpoint}openai/deployments/${this.config.deploymentName}/chat/completions?api-version=${this.config.apiVersion}`;
+      logger.info('Azure OpenAI request URL:', { url, endpoint: this.config.endpoint, deploymentName: this.config.deploymentName, apiVersion: this.config.apiVersion });
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'api-key': this.config.apiKey,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          messages,
+          max_tokens: 800,
+          temperature: 0.8,
+          top_p: 0.9
+        })
       });
 
-      const script = response.choices[0]?.message?.content?.trim();
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Azure OpenAI API error: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+
+      const result = await response.json() as any;
+
+      const script = result.choices[0]?.message?.content?.trim();
       
       if (!script) {
         throw new Error('No podcast script generated from Azure OpenAI');
@@ -197,15 +217,28 @@ Please create an engaging podcast script that covers the main points of this con
         }
       ];
 
-      const response = await this.client.chat.completions.create({
-        model: this.config.deploymentName,
-        messages,
-        max_tokens: 10,
-        temperature: 0
+      const response = await fetch(`${this.config.endpoint}openai/deployments/${this.config.deploymentName}/chat/completions?api-version=${this.config.apiVersion}`, {
+        method: 'POST',
+        headers: {
+          'api-key': this.config.apiKey,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          messages,
+          max_tokens: 10,
+          temperature: 0
+        })
       });
 
-      const result = response.choices[0]?.message?.content?.trim();
-      this.isHealthy = result === 'OK';
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Azure OpenAI API error: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+
+      const result = await response.json() as any;
+
+      const responseText = result.choices[0]?.message?.content?.trim();
+      this.isHealthy = responseText === 'OK';
       
       return this.isHealthy;
 

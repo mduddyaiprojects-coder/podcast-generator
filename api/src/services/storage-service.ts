@@ -37,7 +37,7 @@ export class StorageService {
 
   constructor(config: StorageConfig) {
     this.config = config;
-    this.blobServiceClient = new BlobServiceClient(config.connectionString);
+    this.blobServiceClient = BlobServiceClient.fromConnectionString(config.connectionString);
     this.containerClient = this.blobServiceClient.getContainerClient(config.containerName);
   }
 

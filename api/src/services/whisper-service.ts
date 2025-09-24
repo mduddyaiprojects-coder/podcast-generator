@@ -42,7 +42,7 @@ export class WhisperService {
     this.config = {
       apiKey: process.env['AZURE_OPENAI_API_KEY'] || '',
       endpoint: process.env['AZURE_OPENAI_ENDPOINT'] || '',
-      apiVersion: process.env['AZURE_OPENAI_API_VERSION'] || '2024-12-01-preview'
+      apiVersion: process.env['AZURE_OPENAI_WHISPER_API_VERSION'] || '2024-06-01'
     };
 
     if (!this.config.apiKey || !this.config.endpoint) {

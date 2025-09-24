@@ -87,18 +87,18 @@ export class CdnCacheManagementService {
         reason: request.reason
       });
 
-      const purgeOperation = await this.cdnClient.endpoints.purgeContent(
+      const purgeOperation = await this.cdnClient.endpoints.beginPurgeContentAndWait(
         this.config.resourceGroupName,
         this.config.profileName,
         this.config.endpointName,
         {
-          contentPaths: request.contentPaths,
-          domains: request.domains
+          contentPaths: request.contentPaths
+          // domains: request.domains // Property not available in current API version
         }
       );
 
       // Azure CDN purge operations are asynchronous
-      const invalidationId = purgeOperation.name || `invalidation-${Date.now()}`;
+      const invalidationId = (purgeOperation as any)?.name || `invalidation-${Date.now()}`;
       const estimatedCompletionTime = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
       logger.info('CDN cache invalidation initiated', {
@@ -180,11 +180,11 @@ export class CdnCacheManagementService {
         for (const rule of endpoint.deliveryPolicy.rules) {
           const pathCondition = rule.conditions?.find(c => c.name === 'UrlPath');
           const cacheAction = rule.actions?.find(a => a.name === 'CacheExpiration');
-          const headerAction = rule.actions?.find(a => a.name === 'ModifyResponseHeader');
+          // const headerAction = rule.actions?.find(a => a.name === 'ModifyResponseHeader'); // Unused variable
 
           if (pathCondition && cacheAction) {
-            const path = pathCondition.parameters?.matchValues?.[0] || '/';
-            const cacheDuration = this.parseCacheDuration(cacheAction.parameters?.cacheDuration || '0');
+            const path = (pathCondition as any).parameters?.matchValues?.[0] || '/';
+            const cacheDuration = this.parseCacheDuration((cacheAction as any).parameters?.cacheDuration || '0');
             const compression = endpoint.isCompressionEnabled || false;
             const queryStringCaching = endpoint.queryStringCachingBehavior === 'UseQueryString';
 
@@ -362,9 +362,10 @@ export class CdnCacheManagementService {
     // Parse format like "365.00:00:00" or "7.00:00:00"
     const parts = duration.split(':');
     if (parts.length === 3) {
-      const days = parseInt(parts[0].split('.')[0]) || 0;
-      const hours = parseInt(parts[1]) || 0;
-      const minutes = parseInt(parts[2]) || 0;
+      const daysPart = parts[0]?.split('.')[0];
+      const days = parseInt(daysPart || '0') || 0;
+      const hours = parseInt(parts[1] || '0') || 0;
+      const minutes = parseInt(parts[2] || '0') || 0;
       return days * 24 * 60 * 60 + hours * 60 * 60 + minutes * 60;
     }
     return 0;
@@ -421,4 +422,5 @@ export class CdnCacheManagementService {
     }
   }
 }
+
 

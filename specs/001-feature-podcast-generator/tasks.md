@@ -156,21 +156,32 @@
 - [x] T075 Validate RSS feed against iTunes requirements
 
 ## Phase 3.10: Polish
-- [ ] T076 [P] Unit tests for all services in tests/unit/
-- [ ] T077 [P] Unit tests for all utilities in tests/unit/
-- [ ] T078 [P] Unit tests for all models in tests/unit/
+- [x] T076 [P] Unit tests for all services in tests/unit/
+- [x] T077 [P] Unit tests for all utilities in tests/unit/
+- [x] T078 [P] Unit tests for all models in tests/unit/
 - [ ] T079 Performance tests for API endpoints
 - [ ] T080 Performance tests for n8n workflows
 - [ ] T081 Performance tests for iOS Share Sheet
-- [ ] T082 [P] Update API documentation in docs/api.md
-- [ ] T083 [P] Update deployment documentation in docs/deployment.md
-- [ ] T084 [P] Update user guide in docs/user-guide.md
-- [ ] T085 Remove code duplication and refactor
+- [x] T082 [P] Update API documentation in docs/api.md
+- [x] T083 [P] Update deployment documentation in docs/deployment.md
+- [x] T084 [P] Update user guide in docs/user-guide.md
+- [x] T085 Remove code duplication and refactor
 - [ ] T086 Run manual testing scenarios from quickstart.md
-- [ ] T087 Security audit and penetration testing
+- [x] T087 Security audit and penetration testing
 - [ ] T088 Load testing with 10 concurrent users
-- [ ] T089 End-to-end testing with real content
+- [x] T089 End-to-end testing with real content
+- [ ] T089B Fix E2E test data issues to achieve 100% pass rate
 - [ ] T090 Production deployment and monitoring setup
+
+## 3.11 E2E Resolution Phase
+
+- [ ] T091 E2E Resolution Phase - Voice Name Mapping Issues (ROOT CAUSE)
+- [ ] T092 E2E Resolution Phase - Chapter Marker Duration Issues (ROOT CAUSE)
+- [ ] T093 E2E Resolution Phase - Test Timeout Issues (ROOT CAUSE)
+- [ ] T094 E2E Resolution Phase - Audio Generation Tests (5/13 passing)
+- [ ] T095 E2E Resolution Phase - Content Processing Tests (9/12 passing)
+- [ ] T096 E2E Resolution Phase - Podcast Generation Pipeline Tests (10/20 passing)
+- [ ] T097 E2E Resolution Phase - Content Validation Issues
 
 ## Dependencies
 - Tests (T009-T016) before implementation (T017-T030)
@@ -182,6 +193,7 @@
 - External services (T054-T061) before storage (T062-T068)
 - Storage (T062-T068) before RSS feeds (T069-T075)
 - All implementation before polish (T076-T090)
+- E2E Resolution Phase (T091-T097) after T089B
 
 ## Parallel Examples
 

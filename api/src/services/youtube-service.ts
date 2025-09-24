@@ -1,3 +1,6 @@
+import { BaseService } from './base-service';
+import { getApiKeyConfig } from '../utils/service-config';
+import { ServiceErrorHandler } from '../utils/service-error-handler';
 import { logger } from '../utils/logger';
 
 export interface YouTubeConfig {
@@ -43,20 +46,22 @@ export interface YouTubeChannelInfo {
   thumbnailUrl: string;
 }
 
-export class YouTubeService {
-  private config: YouTubeConfig;
-  private isHealthy: boolean = true;
+export class YouTubeService extends BaseService {
+  protected override config!: YouTubeConfig;
 
   constructor() {
+    super('YouTubeService');
+    this.initializeConfig();
+  }
+
+  protected override initializeConfig(): void {
+    const apiConfig = getApiKeyConfig('youtube');
     this.config = {
-      apiKey: process.env['YOUTUBE_API_KEY'] || '',
-      baseUrl: process.env['YOUTUBE_BASE_URL'] || 'https://www.googleapis.com/youtube/v3'
+      apiKey: apiConfig.apiKey || '',
+      baseUrl: apiConfig.baseUrl || 'https://www.googleapis.com/youtube/v3'
     };
 
-    if (!this.config.apiKey) {
-      logger.warn('YouTube API key not configured - service will not function');
-      this.isHealthy = false;
-    }
+    this.validateRequiredConfig(['apiKey']);
   }
 
   /**
@@ -67,21 +72,26 @@ export class YouTubeService {
       return false;
     }
 
-    try {
-      // Test API connectivity with a simple search
-      const response = await fetch(`${this.config.baseUrl}/search?part=snippet&q=test&type=video&maxResults=1&key=${this.config.apiKey}`);
-      
-      if (!response.ok) {
-        throw new Error(`YouTube API error: ${response.status} ${response.statusText}`);
-      }
+    return ServiceErrorHandler.handleAsyncOperation(
+      async () => {
+        // Test API connectivity with a simple search
+        const response = await fetch(`${this.config.baseUrl}/search?part=snippet&q=test&type=video&maxResults=1&key=${this.config.apiKey}`);
+        
+        if (!response.ok) {
+          throw new Error(`YouTube API error: ${response.status} ${response.statusText}`);
+        }
 
-      logger.info('YouTube service health check passed');
-      return true;
-    } catch (error) {
-      logger.error('YouTube health check failed:', error);
-      this.isHealthy = false;
+        this.logOperation('health check passed');
+        return true;
+      },
+      {
+        service: this.serviceName,
+        operation: 'health check'
+      }
+    ).catch(() => {
+      this.setHealthStatus(false, 'API connectivity failed');
       return false;
-    }
+    });
   }
 
   /**

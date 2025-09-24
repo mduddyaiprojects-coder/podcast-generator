@@ -1,5 +1,6 @@
 import { logger } from '../utils/logger';
 import { ElevenLabsService } from './elevenlabs-service';
+import { AzureSpeechService } from './azure-speech-service';
 
 /**
  * TTSService
@@ -43,15 +44,17 @@ export interface AudioFormat {
 
 export class TTSService {
   private elevenlabsService: ElevenLabsService;
+  private azureSpeechService: AzureSpeechService;
   private defaultConfig: TTSConfig;
   private audioFormats: Record<TTSProvider, AudioFormat>;
 
   constructor() {
     this.elevenlabsService = new ElevenLabsService();
+    this.azureSpeechService = new AzureSpeechService();
     this.defaultConfig = {
-      provider: 'elevenlabs',
-      voice_id: 'default',
-      language: 'en',
+      provider: 'azure',
+      voice_name: 'en-US-AriaNeural',
+      language: 'en-US',
       speed: 1.0,
       pitch: 1.0,
       volume: 1.0
@@ -122,7 +125,7 @@ export class TTSService {
    */
   async generateAudioWithFallback(
     text: string,
-    preferredProvider: TTSProvider = 'elevenlabs',
+    preferredProvider: TTSProvider = 'azure',
     config: Partial<TTSConfig> = {}
   ): Promise<TTSResult> {
     const mergedConfig = { ...this.defaultConfig, ...config, provider: preferredProvider };
@@ -187,45 +190,42 @@ export class TTSService {
    */
   private async generateWithAzure(text: string, config: TTSConfig): Promise<TTSResult> {
     try {
-      logger.info('Generating audio with Azure TTS');
+      logger.info('Generating audio with Azure Speech Services');
       
-      // TODO: Implement Azure TTS integration
-      // For now, return mock data
-      logger.warn('Azure TTS integration not implemented, using mock data');
-      
-      // Create mock audio buffer
-      const mockAudioBuffer = this.createMockAudioBuffer(text.length);
-      
-      // Calculate duration
-      const estimatedDuration = this.estimateDuration(text, config.speed || 1.0);
+      // Use Azure Speech service to generate audio
+      const azureResult = await this.azureSpeechService.generateAudio(
+        text, 
+        config.voice_name || 'en-US-AriaNeural'
+      );
       
       // Calculate quality score
       const qualityScore = this.calculateQualityScore(text, 'azure');
 
       const result: TTSResult = {
-        audio_buffer: mockAudioBuffer,
-        duration_seconds: estimatedDuration,
-        file_size_bytes: mockAudioBuffer.length,
+        audio_buffer: azureResult.audioBuffer,
+        duration_seconds: azureResult.duration,
+        file_size_bytes: azureResult.audioBuffer.length,
         provider_used: 'azure',
-        voice_used: config.voice_name || 'azure-default',
+        voice_used: azureResult.voiceUsed,
         metadata: {
           original_text_length: text.length,
           processing_time_ms: 0, // Will be set by caller
           quality_score: qualityScore,
-          voice_name: config.voice_name,
-          language: config.language,
+          voice_name: azureResult.voiceUsed,
+          language: azureResult.language,
           speed: config.speed,
           pitch: config.pitch,
           volume: config.volume,
-          audio_format: this.audioFormats.azure
+          audio_format: this.audioFormats.azure,
+          format: azureResult.format
         }
       };
 
-      logger.info(`Azure TTS completed: ${result.duration_seconds}s, ${result.file_size_bytes} bytes`);
+      logger.info(`Azure Speech TTS completed: ${result.duration_seconds}s, ${result.file_size_bytes} bytes`);
       return result;
     } catch (error) {
-      logger.error('Azure TTS generation failed:', error);
-      throw new Error(`Azure TTS failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      logger.error('Azure Speech TTS generation failed:', error);
+      throw new Error(`Azure Speech TTS failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -282,15 +282,6 @@ export class TTSService {
     return Math.min(100, Math.max(0, score));
   }
 
-  /**
-   * Create mock audio buffer for testing
-   */
-  private createMockAudioBuffer(textLength: number): Buffer {
-    // Create a simple mock audio buffer
-    // In a real implementation, this would be actual audio data
-    const mockData = new Array(textLength).fill(0).map((_, i) => i % 256);
-    return Buffer.from(mockData);
-  }
 
   /**
    * Get available voices for a provider
@@ -325,16 +316,19 @@ export class TTSService {
    * Get Azure TTS voices
    */
   private async getAzureVoices(): Promise<Array<{ id: string; name: string; language: string; gender: string }>> {
-    // TODO: Implement Azure TTS voices API
-    logger.warn('Azure TTS voices API not implemented, returning mock data');
-    
-    return [
-      { id: 'en-US-AriaNeural', name: 'Aria', language: 'en-US', gender: 'female' },
-      { id: 'en-US-DavisNeural', name: 'Davis', language: 'en-US', gender: 'male' },
-      { id: 'en-US-JennyNeural', name: 'Jenny', language: 'en-US', gender: 'female' },
-      { id: 'en-US-GuyNeural', name: 'Guy', language: 'en-US', gender: 'male' },
-      { id: 'en-US-AmberNeural', name: 'Amber', language: 'en-US', gender: 'female' }
-    ];
+    try {
+      return await this.azureSpeechService.getAvailableVoices();
+    } catch (error) {
+      logger.error('Failed to get Azure voices:', error);
+      // Return fallback voices
+      return [
+        { id: 'en-US-AriaNeural', name: 'Aria', language: 'en-US', gender: 'female' },
+        { id: 'en-US-DavisNeural', name: 'Davis', language: 'en-US', gender: 'male' },
+        { id: 'en-US-JennyNeural', name: 'Jenny', language: 'en-US', gender: 'female' },
+        { id: 'en-US-GuyNeural', name: 'Guy', language: 'en-US', gender: 'male' },
+        { id: 'en-US-AmberNeural', name: 'Amber', language: 'en-US', gender: 'female' }
+      ];
+    }
   }
 
   /**
@@ -414,9 +408,12 @@ export class TTSService {
    * Check Azure TTS health
    */
   private async checkAzureHealth(): Promise<boolean> {
-    // TODO: Implement Azure TTS health check
-    logger.warn('Azure TTS health check not implemented');
-    return true;
+    try {
+      return await this.azureSpeechService.checkHealth();
+    } catch (error) {
+      logger.error('Azure TTS health check failed:', error);
+      return false;
+    }
   }
 
   /**
