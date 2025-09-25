@@ -11,12 +11,12 @@ export class DatabaseService {
     const databaseUrl = process.env['DATABASE_URL'];
     
     const poolConfig = {
-      // Connection pool settings optimized for Azure Functions
-      max: 10, // Maximum number of clients in the pool
-      min: 2,  // Minimum number of clients in the pool
-      idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
-      connectionTimeoutMillis: 10000, // Return an error after 10 seconds if connection could not be established
-      acquireTimeoutMillis: 10000, // Return an error after 10 seconds if a client could not be acquired
+      // Connection pool settings optimized for Azure Functions Consumption Plan
+      max: 2,  // Maximum number of clients in the pool (reduced from 10)
+      min: 1,  // Minimum number of clients in the pool (reduced from 2)
+      idleTimeoutMillis: 10000, // Close idle clients after 10 seconds (reduced from 30)
+      connectionTimeoutMillis: 5000, // Return an error after 5 seconds (reduced from 10)
+      acquireTimeoutMillis: 5000, // Return an error after 5 seconds (reduced from 10)
     };
     
     if (databaseUrl) {

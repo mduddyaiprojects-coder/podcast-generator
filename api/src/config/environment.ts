@@ -60,7 +60,6 @@ export interface EnvironmentConfig {
   };
   features: {
     enableTTS: boolean;
-    enableWhisper: boolean;
     enableYouTube: boolean;
     enableFirecrawl: boolean;
     enableAzureOpenAI: boolean;
@@ -150,7 +149,6 @@ export class EnvironmentService {
       
       features: {
         enableTTS: this.getBooleanEnv('ENABLE_TTS', true),
-        enableWhisper: this.getBooleanEnv('ENABLE_WHISPER', true),
         enableYouTube: this.getBooleanEnv('ENABLE_YOUTUBE', true),
         enableFirecrawl: this.getBooleanEnv('ENABLE_FIRECRAWL', true),
         enableAzureOpenAI: this.getBooleanEnv('ENABLE_AZURE_OPENAI', true)

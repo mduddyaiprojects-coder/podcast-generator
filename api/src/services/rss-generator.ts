@@ -47,6 +47,59 @@ export class RssGenerator {
   }
 
   /**
+   * Generate RSS feed from blob storage (no database required)
+   */
+  async generateRssFromStorage(
+    metadata: Partial<FeedMetadata> = {},
+    options: RSSGenerationOptions = {}
+  ): Promise<string> {
+    try {
+      // Get storage service from ServiceManager
+      const { serviceManager } = require('./service-manager');
+      const storageService = serviceManager.getStorage();
+      
+      logger.info('RSS Generator: Getting audio files from storage', { 
+        storageServiceType: typeof storageService,
+        hasListAudioFiles: typeof storageService.listAudioFiles === 'function'
+      });
+      
+      // Get all audio files from blob storage
+      const audioFiles = await storageService.listAudioFiles();
+      
+      logger.info('RSS Generator: Retrieved audio files', { 
+        audioFileCount: audioFiles.length,
+        files: audioFiles.map((f: any) => f.name)
+      });
+      
+      // Convert blob files to episode objects
+      const episodes = audioFiles.map((file: any, index: number) => {
+        const episodeId = file.name.replace('audio/', '').replace('.mp3', '');
+        
+        // Create proper PodcastEpisode instance with all required methods
+        return new PodcastEpisode({
+          id: episodeId,
+          title: `Episode ${index + 1}`,
+          description: `AI-generated podcast episode from ${episodeId}`,
+          source_url: 'https://example.com', // Default source URL
+          content_type: 'url',
+          audio_url: file.url,
+          audio_duration: 300, // Default 5 minutes
+          audio_size: file.size || 0,
+          pub_date: file.lastModified || new Date(),
+          created_at: file.lastModified || new Date(),
+          updated_at: file.lastModified || new Date()
+        });
+      });
+
+      return await this.generateRss(episodes, metadata, options);
+    } catch (error) {
+      logger.error('Failed to generate RSS from storage:', error);
+      // Return empty RSS feed if storage fails
+      return this.generateEmptyRss(metadata);
+    }
+  }
+
+  /**
    * Generate RSS feed for episodes
    */
   async generateRss(
@@ -386,5 +439,41 @@ export class RssGenerator {
       valid: warnings.length === 0,
       warnings
     };
+  }
+
+  /**
+   * Generate empty RSS feed when no episodes are available
+   */
+  private generateEmptyRss(metadata: Partial<FeedMetadata>): string {
+    const mergedMetadata = { ...this.defaultMetadata, ...metadata };
+    const now = new Date().toUTCString();
+    
+    return `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title><![CDATA[${mergedMetadata.title}]]></title>
+    <description><![CDATA[${mergedMetadata.description}]]></description>
+    <link>${mergedMetadata.link}</link>
+    <language>${mergedMetadata.language}</language>
+    <copyright>Copyright 2025 AI Podcast Generator</copyright>
+    <lastBuildDate>${now}</lastBuildDate>
+    <pubDate>${now}</pubDate>
+    <generator>Podcast Generator v1.0</generator>
+    <managingEditor>${mergedMetadata.email} (AI Podcast Generator)</managingEditor>
+    <webMaster>${mergedMetadata.email} (AI Podcast Generator)</webMaster>
+    
+    <!-- iTunes specific elements -->
+    <itunes:author>${mergedMetadata.author}</itunes:author>
+    <itunes:summary><![CDATA[${mergedMetadata.description}]]></itunes:summary>
+    <itunes:owner>
+      <itunes:name>${mergedMetadata.author}</itunes:name>
+      <itunes:email>${mergedMetadata.email}</itunes:email>
+    </itunes:owner>
+    <itunes:category text="${mergedMetadata.category}"/>
+    <itunes:explicit>${mergedMetadata.explicit ? 'yes' : 'no'}</itunes:explicit>
+    
+    <!-- No episodes available -->
+  </channel>
+</rss>`;
   }
 }

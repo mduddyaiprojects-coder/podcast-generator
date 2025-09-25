@@ -4,7 +4,6 @@ import { ContentSubmissionService } from '../../src/services/content-submission-
 // Mock dependencies
 jest.mock('../../src/services/content-processor');
 jest.mock('../../src/services/podcast-generator');
-jest.mock('../../src/services/database-service');
 jest.mock('../../src/utils/logger', () => ({
   logger: {
     info: jest.fn(),

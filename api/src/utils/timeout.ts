@@ -23,7 +23,6 @@ export const DEFAULT_TIMEOUT_CONFIG: TimeoutConfig = {
     'elevenlabs': 120000,      // 2 minutes for TTS generation
     'firecrawl': 45000,        // 45 seconds for web scraping
     'youtube': 15000,          // 15 seconds for API calls
-    'whisper': 180000,         // 3 minutes for audio transcription
     'database': 10000,         // 10 seconds for database operations
     'storage': 30000           // 30 seconds for storage operations
   }

@@ -1,0 +1,11 @@
+<step title="BackgroundTrace" date="2025-09-24T20:31:39.126" instance="16ed5e" url="synctriggers-operation" method="POST" >
+  <step title="Cleanup Xml Logs" date="2025-09-24T20:31:39.141" >
+    <step title="Cleanup Infos" date="2025-09-24T20:31:39.173" totalFiles="201" totalCleanup="41" /><!-- duration: 2172ms -->
+  </step><!-- duration: 2234ms -->
+  <step title="Updating shutdown sentinel last write time" date="2025-09-24T20:31:41.391" SemaphoreCount="7" /><!-- duration: 31ms -->
+  <step title="Delaying &apos;00:01:00&apos; for Functions site to restart." date="2025-09-24T20:31:41.454" /><!-- duration: 16ms -->
+  <step title="Begin HttpPost https://podcast-gen-api.azurewebsites.net/admin/host/synctriggers, x-ms-request-id: 2b2ee76e-98f6-499a-af2d-9f7af81979f0" date="2025-09-24T20:32:41.527" /><!-- duration: 47ms -->
+  <step title="End HttpPost, status: OK" date="2025-09-24T20:32:42.718" /><!-- duration: 31ms -->
+  <step title="Syncing function triggers by calling the functions runtime site successful." date="2025-09-24T20:32:42.765" /><!-- duration: 31ms -->
+  <step title="Deleting shutdown sentinel file" date="2025-09-24T20:32:42.828" SemaphoreCount="8" /><!-- duration: 16ms -->
+</step><!-- duration: 63749ms -->

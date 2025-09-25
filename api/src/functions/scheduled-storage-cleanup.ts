@@ -1,7 +1,7 @@
 import { InvocationContext } from '@azure/functions';
 import { AzureBlobStorageService } from '../services/azure-blob-storage';
 import { StorageLifecycleService } from '../services/storage-lifecycle';
-import { StorageCostMonitoringService } from '../services/storage-cost-monitoring';
+// Storage cost monitoring removed - not needed for personal use
 // import { logger } from '../utils/logger'; // Unused
 
 /**
@@ -16,7 +16,7 @@ export async function scheduledStorageCleanup(_timer: any, context: InvocationCo
     // Initialize services
     const blobStorage = new AzureBlobStorageService();
     const lifecycleService = new StorageLifecycleService(blobStorage);
-    const costMonitoring = new StorageCostMonitoringService();
+    // Cost monitoring removed - not needed for personal use
 
     // Initialize blob storage
     await blobStorage.initialize();
@@ -45,31 +45,14 @@ export async function scheduledStorageCleanup(_timer: any, context: InvocationCo
       recommendationsCount: recommendations.recommendations.length
     });
 
-    // Check for cost alerts
-    context.log('Checking cost alerts...');
-    const alerts = await costMonitoring.checkCostAlerts();
-    
-    if (alerts.length > 0) {
-      context.log('Cost alerts detected:', alerts.map(alert => ({
-        type: alert.type,
-        severity: alert.severity,
-        message: alert.message,
-        actionRequired: alert.actionRequired
-      })));
-    }
+    // Cost monitoring removed - not needed for personal use
 
     // Clean up temporary files
     context.log('Cleaning up temporary files...');
     const tempFilesDeleted = await lifecycleService.cleanupTemporaryFiles();
     context.log(`Cleaned up ${tempFilesDeleted} temporary files`);
 
-    // Get final cost metrics
-    const costMetrics = await costMonitoring.getStorageCostMetrics();
-    context.log('Final storage cost metrics:', {
-      totalStorageGB: costMetrics.totalStorageGB,
-      estimatedMonthlyCost: costMetrics.estimatedMonthlyCost,
-      costByTier: costMetrics.costByTier
-    });
+    // Cost metrics removed - not needed for personal use
 
     const executionTime = Date.now() - startTime;
     context.log(`Scheduled storage cleanup completed successfully in ${executionTime}ms`);

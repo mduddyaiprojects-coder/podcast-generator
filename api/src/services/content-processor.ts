@@ -1,6 +1,5 @@
 import { ContentSubmission } from '../models/content-submission';
-import { FirecrawlService } from './firecrawl-service';
-import { AzureOpenAIService } from './azure-openai-service';
+import { serviceManager } from './service-manager';
 import { logger } from '../utils/logger';
 
 export interface ExtractedContent {
@@ -17,12 +16,8 @@ export interface ExtractedContent {
 }
 
 export class ContentProcessor {
-  private firecrawlService: FirecrawlService;
-  private azureOpenAIService: AzureOpenAIService;
-
   constructor() {
-    this.firecrawlService = new FirecrawlService();
-    this.azureOpenAIService = new AzureOpenAIService();
+    // Services will be lazy loaded via ServiceManager
   }
 
   async extractContent(submission: ContentSubmission): Promise<ExtractedContent> {
@@ -45,11 +40,13 @@ export class ContentProcessor {
   }
 
   private async extractFromUrl(url: string): Promise<ExtractedContent> {
-    // Use Firecrawl to extract content from URL
-    const extracted = await this.firecrawlService.extractContent(url);
+    // Use Firecrawl to extract content from URL (lazy loaded)
+    const firecrawl = serviceManager.getFirecrawl();
+    const extracted = await firecrawl.extractContent(url);
     
-    // Use Azure OpenAI to generate summary
-    const summary = await this.azureOpenAIService.generateSummary(extracted.content);
+    // Use Azure OpenAI to generate summary (lazy loaded)
+    const azureOpenAI = serviceManager.getAzureOpenAI();
+    const summary = await azureOpenAI.generateSummary(extracted.content);
 
     return {
       title: extracted.title,
@@ -72,8 +69,9 @@ export class ContentProcessor {
   }
 
   private async extractFromDocument(document: any): Promise<ExtractedContent> {
-    // Process document content
-    const summary = await this.azureOpenAIService.generateSummary(document.content);
+    // Process document content (lazy loaded)
+    const azureOpenAI = serviceManager.getAzureOpenAI();
+    const summary = await azureOpenAI.generateSummary(document.content);
 
     return {
       title: document.title,

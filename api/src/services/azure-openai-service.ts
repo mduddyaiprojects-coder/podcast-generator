@@ -1,6 +1,7 @@
 import { logger } from '../utils/logger';
-import { environmentService } from '../config/environment';
-import { apiKeySecurityService } from './api-key-security';
+// Lazy imports to prevent circular dependencies
+// import { environmentService } from '../config/environment';
+// import { apiKeySecurityService } from './api-key-security';
 
 export interface ExtractedContent {
   title: string;
@@ -21,35 +22,23 @@ export class AzureOpenAIService {
   private isHealthy: boolean = true;
 
   constructor() {
-    const envConfig = environmentService.getConfig();
     this.config = {
-      endpoint: envConfig.apiKeys.azureOpenAI.endpoint,
-      apiKey: envConfig.apiKeys.azureOpenAI.apiKey,
-      apiVersion: envConfig.apiKeys.azureOpenAI.apiVersion,
-      deploymentName: envConfig.apiKeys.azureOpenAI.deploymentName
+      endpoint: process.env['AZURE_OPENAI_ENDPOINT'] || '',
+      apiKey: process.env['AZURE_OPENAI_API_KEY'] || '',
+      apiVersion: process.env['AZURE_OPENAI_API_VERSION'] || '2024-02-15-preview',
+      deploymentName: process.env['AZURE_OPENAI_DEPLOYMENT_NAME'] || 'gpt-4'
     };
 
     if (!this.config.endpoint || !this.config.apiKey) {
       logger.warn('Azure OpenAI not configured - service will not function');
       this.isHealthy = false;
-    } else {
-      // Validate API key security
-      this.validateApiKeySecurity();
     }
   }
 
   /**
    * Validate API key security
    */
-  private async validateApiKeySecurity(): Promise<void> {
-    if (environmentService.isSecurityFeatureEnabled('enableApiKeyValidation')) {
-      try {
-        await apiKeySecurityService.validateApiKey('azure-openai', this.config.apiKey);
-      } catch (error) {
-        logger.warn('Azure OpenAI API key validation failed', { error });
-      }
-    }
-  }
+  // API key security validation removed - not needed for personal use
 
   /**
    * Generate a summary of the provided content

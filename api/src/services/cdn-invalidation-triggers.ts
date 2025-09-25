@@ -1,4 +1,4 @@
-import { CdnCacheManagementService } from './cdn-cache-management';
+import { serviceManager } from './service-manager';
 import { logger } from '../utils/logger';
 
 export interface InvalidationTrigger {
@@ -45,13 +45,13 @@ export interface InvalidationEvent {
 }
 
 export class CdnInvalidationTriggersService {
-  private cacheManagement: CdnCacheManagementService;
+  // cacheManagement will be lazy loaded via ServiceManager
   private triggers: Map<string, InvalidationTrigger> = new Map();
   private eventQueue: InvalidationEvent[] = [];
   private isProcessing = false;
 
   constructor() {
-    this.cacheManagement = new CdnCacheManagementService();
+    // Services will be lazy loaded via ServiceManager
     this.initializeDefaultTriggers();
   }
 
@@ -522,7 +522,8 @@ export class CdnInvalidationTriggersService {
     }
 
     if (contentPaths.length > 0) {
-      await this.cacheManagement.invalidateCache({
+      const cacheManagement = serviceManager.getCdnCacheManagement();
+      await cacheManagement.invalidateCache({
         contentPaths,
         reason: `Triggered by ${trigger.name}`,
         priority: 'normal'

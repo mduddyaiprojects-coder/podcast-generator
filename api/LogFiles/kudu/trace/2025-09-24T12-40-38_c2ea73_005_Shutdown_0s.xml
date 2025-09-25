@@ -1,0 +1,3 @@
+<step title="Process Shutdown" date="2025-09-24T12:40:38.272" instance="c2ea73" pid="5228,2,8" uptime="00:01:23.0940452" lastrequesttime="00:01:15.0973344" >
+  <step title="Cleanup Xml Logs" date="2025-09-24T12:40:38.303" /><!-- duration: 31ms -->
+</step><!-- duration: 94ms -->

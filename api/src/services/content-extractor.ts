@@ -1,7 +1,5 @@
 import { ContentSubmission, ContentSubmissionMetadata } from '../models/content-submission';
-import { FirecrawlService } from './firecrawl-service';
-import { AzureOpenAIService } from './azure-openai-service';
-import { YouTubeService } from './youtube-service';
+import { serviceManager } from './service-manager';
 import { logger } from '../utils/logger';
 
 /**
@@ -45,14 +43,8 @@ export interface DocumentInfo {
 }
 
 export class ContentExtractor {
-  private firecrawlService: FirecrawlService;
-  private azureOpenAIService: AzureOpenAIService;
-  private youtubeService: YouTubeService;
-
   constructor() {
-    this.firecrawlService = new FirecrawlService();
-    this.azureOpenAIService = new AzureOpenAIService();
-    this.youtubeService = new YouTubeService();
+    // Services will be lazy loaded via ServiceManager
   }
 
   /**
@@ -96,8 +88,9 @@ export class ContentExtractor {
     try {
       logger.info(`Extracting content from URL: ${url}`);
 
-      // Use Firecrawl to extract content
-      const firecrawlResult = await this.firecrawlService.extractContent(url);
+      // Use Firecrawl to extract content (lazy loaded)
+      const firecrawlService = serviceManager.getFirecrawl();
+      const firecrawlResult = await firecrawlService.extractContent(url);
       
       // Calculate word count and reading time
       const wordCount = this.calculateWordCount(firecrawlResult.content);
@@ -201,8 +194,9 @@ export class ContentExtractor {
     try {
       logger.info(`Extracting content from PDF: ${pdfUrl}`);
 
-      // Use Firecrawl to extract PDF content
-      const firecrawlResult = await this.firecrawlService.extractContent(pdfUrl);
+      // Use Firecrawl to extract PDF content (lazy loaded)
+      const firecrawlService = serviceManager.getFirecrawl();
+      const firecrawlResult = await firecrawlService.extractContent(pdfUrl);
       
       // Calculate word count and reading time
       const wordCount = this.calculateWordCount(firecrawlResult.content);
@@ -247,8 +241,9 @@ export class ContentExtractor {
     try {
       logger.info(`Extracting content from document: ${documentUrl}`);
 
-      // Use Firecrawl to extract document content
-      const firecrawlResult = await this.firecrawlService.extractContent(documentUrl);
+      // Use Firecrawl to extract document content (lazy loaded)
+      const firecrawlService = serviceManager.getFirecrawl();
+      const firecrawlResult = await firecrawlService.extractContent(documentUrl);
       
       // Calculate word count and reading time
       const wordCount = this.calculateWordCount(firecrawlResult.content);
@@ -316,8 +311,9 @@ export class ContentExtractor {
     try {
       logger.info(`Getting YouTube video info for video ID: ${videoId}`);
       
-      // Use the YouTube service to get video metadata
-      const videoMetadata = await this.youtubeService.getVideoMetadata(videoId);
+      // Use the YouTube service to get video metadata (lazy loaded)
+      const youtubeService = serviceManager.getYouTube();
+      const videoMetadata = await youtubeService.getVideoMetadata(videoId);
       
       // Convert YouTube API response to our internal format
       return {
@@ -525,11 +521,13 @@ export class ContentExtractor {
    */
   async checkHealth(): Promise<boolean> {
     try {
-      // Check Firecrawl service health
-      const firecrawlHealthy = await this.firecrawlService.checkHealth();
+      // Check Firecrawl service health (lazy loaded)
+      const firecrawlService = serviceManager.getFirecrawl();
+      const firecrawlHealthy = await firecrawlService.checkHealth();
       
-      // Check Azure OpenAI service health
-      const azureOpenAIHealthy = await this.azureOpenAIService.checkHealth();
+      // Check Azure OpenAI service health (lazy loaded)
+      const azureOpenAIService = serviceManager.getAzureOpenAI();
+      const azureOpenAIHealthy = await azureOpenAIService.checkHealth();
       
       return firecrawlHealthy && azureOpenAIHealthy;
     } catch (error) {

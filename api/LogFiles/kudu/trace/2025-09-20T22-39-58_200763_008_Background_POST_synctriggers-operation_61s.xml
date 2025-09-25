@@ -1,0 +1,8 @@
+<step title="BackgroundTrace" date="2025-09-20T22:39:58.083" instance="200763" url="synctriggers-operation" method="POST" >
+  <step title="Updating shutdown sentinel last write time" date="2025-09-20T22:39:58.099" SemaphoreCount="6" /><!-- duration: 14ms -->
+  <step title="Delaying &apos;00:01:00&apos; for Functions site to restart." date="2025-09-20T22:39:58.130" /><!-- duration: 15ms -->
+  <step title="Begin HttpPost https://podcast-gen-api.azurewebsites.net/admin/host/synctriggers, x-ms-request-id: fae33df1-b429-462d-9cb4-972aac32727c" date="2025-09-20T22:40:58.209" /><!-- duration: 31ms -->
+  <step title="End HttpPost, status: OK" date="2025-09-20T22:40:59.397" /><!-- duration: 16ms -->
+  <step title="Syncing function triggers by calling the functions runtime site successful." date="2025-09-20T22:40:59.428" /><!-- duration: 16ms -->
+  <step title="Deleting shutdown sentinel file" date="2025-09-20T22:40:59.459" SemaphoreCount="8" /><!-- duration: 16ms -->
+</step><!-- duration: 61408ms -->

@@ -64,7 +64,8 @@ export class AzureSpeechService {
       // Set voice
       const voice = voiceName || this.config.voiceName || 'en-US-AriaNeural';
       speechConfig.speechSynthesisVoiceName = voice;
-      speechConfig.speechSynthesisOutputFormat = sdk.SpeechSynthesisOutputFormat.Audio24Khz48KBitRateMonoMp3;
+      // Use lower quality audio to reduce memory usage
+      speechConfig.speechSynthesisOutputFormat = sdk.SpeechSynthesisOutputFormat.Audio16Khz32KBitRateMonoMp3;
 
       // Create synthesizer
       const synthesizer = new sdk.SpeechSynthesizer(speechConfig, null);
@@ -90,6 +91,9 @@ export class AzureSpeechService {
               // Estimate duration (rough calculation)
               const estimatedDuration = this.estimateDuration(text);
 
+              // Clean up synthesizer
+              synthesizer.close();
+
               resolve({
                 audioBuffer,
                 duration: estimatedDuration,
@@ -102,6 +106,7 @@ export class AzureSpeechService {
                 reason: result.reason,
                 errorDetails: result.errorDetails
               });
+              synthesizer.close(); // Ensure cleanup
               reject(new Error(`Speech synthesis failed: ${result.errorDetails}`));
             }
           },

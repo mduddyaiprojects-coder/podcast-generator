@@ -1,5 +1,13 @@
 import { HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
+import { serviceManager } from '../services/service-manager';
+import { logger } from '../utils/logger';
 
+/**
+ * POST /api/content
+ * 
+ * Content submission endpoint that processes web articles, YouTube videos, and documents
+ * into podcast episodes using AI and TTS services
+ */
 export async function contentSubmissionFunction(
   request: HttpRequest,
   context: InvocationContext
@@ -8,7 +16,7 @@ export async function contentSubmissionFunction(
     context.log('Content submission request received');
 
     // Parse request body
-    const body = await request.json() as { content_url?: string; content_type?: string };
+    const body = await request.json() as { content_url?: string; content_type?: string; user_note?: string };
     const { content_url, content_type } = body;
 
     // Basic validation
@@ -50,20 +58,22 @@ export async function contentSubmissionFunction(
       };
     }
 
-    // Generate submission ID
-    const submissionId = `sub_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
-    // Calculate estimated completion (15 minutes from now)
-    const estimatedCompletion = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+    // Process content submission using ServiceManager
+    const contentService = serviceManager.getContentSubmissionService();
+    const result = await contentService.processSubmission(body);
 
-    context.log('Content submission processed:', { submissionId, content_url, content_type });
+    context.log('Content submission processed:', { 
+      submissionId: result.submissionId, 
+      content_url, 
+      content_type 
+    });
 
     return {
       status: 202,
       jsonBody: {
-        submission_id: submissionId,
+        submission_id: result.submissionId,
         status: 'pending',
-        estimated_completion: estimatedCompletion,
+        estimated_completion: result.estimatedCompletion,
         message: 'Content submitted for processing',
         content_url,
         content_type
@@ -72,6 +82,8 @@ export async function contentSubmissionFunction(
 
   } catch (error) {
     context.log('Content submission error:', error);
+    logger.error('Content submission processing error:', error);
+    
     return {
       status: 500,
       jsonBody: {

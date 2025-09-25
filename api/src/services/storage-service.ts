@@ -1,6 +1,5 @@
 import { BlobServiceClient, ContainerClient, BlobUploadCommonResponse } from '@azure/storage-blob';
 import { logger } from '../utils/logger';
-import { cdnService } from './cdn-service';
 
 /**
  * StorageService
@@ -411,19 +410,9 @@ export class StorageService {
    * Generate public URL for a blob
    */
   private async getPublicUrl(blobName: string): Promise<string> {
-    // Try CDN first if configured
+    // Use CDN URL if configured
     if (this.config.cdnBaseUrl) {
       return `${this.config.cdnBaseUrl}/${blobName}`;
-    }
-
-    // Try to get CDN endpoint URL if CDN service is healthy
-    if (cdnService.checkHealth()) {
-      try {
-        const cdnUrl = await cdnService.getEndpointUrl();
-        return `${cdnUrl}/${blobName}`;
-      } catch (error) {
-        logger.warn('Failed to get CDN URL, falling back to blob storage URL', { error });
-      }
     }
     
     // Fallback to direct blob storage URL
@@ -487,6 +476,35 @@ export class StorageService {
     } catch (error) {
       logger.error('Failed to cleanup old files:', error);
       throw new Error(`Cleanup failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * List all audio files in the container
+   */
+  async listAudioFiles(): Promise<Array<{ name: string; url: string; lastModified?: Date; size?: number }>> {
+    try {
+      const audioFiles: Array<{ name: string; url: string; lastModified?: Date; size?: number }> = [];
+      
+      for await (const blob of this.containerClient.listBlobsFlat({ prefix: 'audio/' })) {
+        if (blob.name.endsWith('.mp3')) {
+          const url = this.config.cdnBaseUrl 
+            ? `${this.config.cdnBaseUrl}/${blob.name}`
+            : this.containerClient.getBlockBlobClient(blob.name).url;
+            
+          audioFiles.push({
+            name: blob.name,
+            url,
+            lastModified: blob.properties.lastModified,
+            size: blob.properties.contentLength
+          });
+        }
+      }
+      
+      return audioFiles;
+    } catch (error) {
+      logger.error('Failed to list audio files:', error);
+      return [];
     }
   }
 

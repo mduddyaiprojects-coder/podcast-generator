@@ -1,7 +1,6 @@
 import { HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
 import { ErrorHandler } from '../utils/error-handler';
-import { DatabaseService } from '../services/database-service';
-import { ContentSubmission } from '../models/content-submission';
+import { serviceManager } from '../services/service-manager';
 
 /**
  * POST /api/webhook/share
@@ -100,47 +99,30 @@ export async function webhookShareFunction(
       contentType = 'reddit';
     }
 
-        // Create content submission and save to database
-        const submission = new ContentSubmission({
-          content_url: url,
-          content_type: contentType as any,
-          user_note: title ? `Shared: ${title}` : undefined,
-          status: 'pending'
+        // Process content directly using ContentSubmissionService (no database needed)
+        const contentService = serviceManager.getContentSubmissionService();
+        const result = await contentService.processSubmission(request);
+
+        context.log('Webhook processed successfully:', {
+          submissionId: result.submissionId,
+          url,
+          contentType,
+          title
         });
 
-        const db = new DatabaseService();
-        await db.connect();
-        
-        try {
-          const submissionId = await db.saveSubmission(submission);
-          const estimatedCompletion = new Date(Date.now() + 15 * 60 * 1000).toISOString();
-
-          // Generate RSS feed URL (using the submission ID as feed slug)
-          const rssFeedUrl = `https://podcast-gen-api.azurewebsites.net/api/feeds/${submissionId}/rss.xml`;
-
-          context.log('Webhook processed successfully:', {
-            submissionId,
-            url,
-            contentType,
-            title
-          });
-
-          // Return success response optimized for iOS Shortcuts
-          return {
-            status: 200,
-            jsonBody: {
-              success: true,
-              submission_id: submissionId,
-              message: 'Content added to your podcast feed successfully!',
-              rss_feed_url: rssFeedUrl,
-              estimated_completion: estimatedCompletion,
-              content_type: contentType,
-              title: title || 'Shared Content'
-            }
-          };
-        } finally {
-          await db.disconnect();
-        }
+        // Return success response optimized for iOS Shortcuts
+        return {
+          status: 200,
+          jsonBody: {
+            success: true,
+            submission_id: result.submissionId,
+            message: 'Content added to your podcast feed successfully!',
+            rss_feed_url: 'https://podcast-gen-api.azurewebsites.net/api/feeds/public/rss.xml',
+            estimated_completion: result.estimatedCompletion,
+            content_type: contentType,
+            title: title || 'Shared Content'
+          }
+        };
 
   } catch (error) {
     context.log('Webhook share error:', error);

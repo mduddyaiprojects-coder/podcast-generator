@@ -1,6 +1,5 @@
 import { logger } from '../utils/logger';
-import { ElevenLabsService } from './elevenlabs-service';
-import { AzureSpeechService } from './azure-speech-service';
+import { serviceManager } from './service-manager';
 
 /**
  * TTSService
@@ -43,14 +42,11 @@ export interface AudioFormat {
 }
 
 export class TTSService {
-  private elevenlabsService: ElevenLabsService;
-  private azureSpeechService: AzureSpeechService;
   private defaultConfig: TTSConfig;
   private audioFormats: Record<TTSProvider, AudioFormat>;
 
   constructor() {
-    this.elevenlabsService = new ElevenLabsService();
-    this.azureSpeechService = new AzureSpeechService();
+    // Services will be lazy loaded via ServiceManager
     this.defaultConfig = {
       provider: 'azure',
       voice_name: 'en-US-AriaNeural',
@@ -164,8 +160,9 @@ export class TTSService {
     try {
       logger.info('Generating audio with ElevenLabs');
       
-      // Use ElevenLabs service to generate audio
-      const audioBuffer = await this.elevenlabsService.generateAudio(text);
+      // Use ElevenLabs service to generate audio (lazy loaded)
+      const elevenlabsService = serviceManager.getElevenLabs();
+      const audioBuffer = await elevenlabsService.generateAudio(text);
       
       // Calculate duration (rough estimate based on text length and speed)
       const estimatedDuration = this.estimateDuration(text, config.speed || 1.0);
@@ -210,8 +207,9 @@ export class TTSService {
       // Map voice_id to voice_name for Azure Speech compatibility
       const voiceName = config.voice_name || config.voice_id || 'en-US-AriaNeural';
       
-      // Use Azure Speech service to generate audio
-      const azureResult = await this.azureSpeechService.generateAudio(
+      // Use Azure Speech service to generate audio (lazy loaded)
+      const azureSpeechService = serviceManager.getAzureSpeech();
+      const azureResult = await azureSpeechService.generateAudio(
         text, 
         voiceName
       );
@@ -335,7 +333,8 @@ export class TTSService {
    */
   private async getAzureVoices(): Promise<Array<{ id: string; name: string; language: string; gender: string }>> {
     try {
-      return await this.azureSpeechService.getAvailableVoices();
+      const azureSpeechService = serviceManager.getAzureSpeech();
+      return await azureSpeechService.getAvailableVoices();
     } catch (error) {
       logger.error('Failed to get Azure voices:', error);
       // Return fallback voices
@@ -406,7 +405,8 @@ export class TTSService {
       azure: number;
     };
   }> {
-    const elevenlabsHealthy = await this.elevenlabsService.checkHealth();
+    const elevenlabsService = serviceManager.getElevenLabs();
+    const elevenlabsHealthy = await elevenlabsService.checkHealth();
     const azureHealthy = await this.checkAzureHealth();
     
     const elevenlabsVoices = await this.getElevenLabsVoices();
@@ -427,7 +427,8 @@ export class TTSService {
    */
   private async checkAzureHealth(): Promise<boolean> {
     try {
-      return await this.azureSpeechService.checkHealth();
+      const azureSpeechService = serviceManager.getAzureSpeech();
+      return await azureSpeechService.checkHealth();
     } catch (error) {
       logger.error('Azure TTS health check failed:', error);
       return false;

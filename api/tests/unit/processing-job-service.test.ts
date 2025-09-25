@@ -4,7 +4,6 @@ import { DatabaseService } from '../../src/services/database-service';
 import { ProcessingJob } from '../../src/models/processing-job';
 
 // Mock DatabaseService
-jest.mock('../../src/services/database-service');
 const MockedDatabaseService = DatabaseService as jest.MockedClass<typeof DatabaseService>;
 
 // Mock logger

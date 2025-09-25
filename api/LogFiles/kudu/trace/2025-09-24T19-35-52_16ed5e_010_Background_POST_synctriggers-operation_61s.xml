@@ -1,0 +1,12 @@
+<step title="BackgroundTrace" date="2025-09-24T19:35:52.211" instance="16ed5e" url="synctriggers-operation" method="POST" >
+  <step title="Cleanup Xml Logs" date="2025-09-24T19:35:52.242" /><!-- duration: 109ms -->
+  <step title="Updating shutdown sentinel last write time" date="2025-09-24T19:35:52.367" SemaphoreCount="5" /><!-- duration: 16ms -->
+  <step title="Delaying &apos;00:01:00&apos; for Functions site to restart." date="2025-09-24T19:35:52.399" /><!-- duration: 16ms -->
+  <step title="Begin HttpPost https://podcast-gen-api.azurewebsites.net/admin/host/synctriggers, x-ms-request-id: d711967f-de65-481c-9ac6-7d1bdeea92e9" date="2025-09-24T19:35:57.445" /><!-- duration: 16ms -->
+  <step title="End HttpPost, status: OK" date="2025-09-24T19:36:04.826" /><!-- duration: 27ms -->
+  <step title="Syncing function triggers by calling the functions runtime site successful." date="2025-09-24T19:36:04.868" /><!-- duration: 16ms -->
+  <step title="Begin HttpPost https://podcast-gen-api.azurewebsites.net/admin/host/synctriggers, x-ms-request-id: 30c43a14-9c73-414f-8c85-588e52f37d85" date="2025-09-24T19:36:52.447" /><!-- duration: 31ms -->
+  <step title="End HttpPost, status: OK" date="2025-09-24T19:36:53.260" /><!-- duration: 16ms -->
+  <step title="Syncing function triggers by calling the functions runtime site successful." date="2025-09-24T19:36:53.291" /><!-- duration: 31ms -->
+  <step title="Deleting shutdown sentinel file" date="2025-09-24T19:36:53.338" SemaphoreCount="8" /><!-- duration: 16ms -->
+</step><!-- duration: 61174ms -->

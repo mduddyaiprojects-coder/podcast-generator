@@ -1,7 +1,6 @@
-import { CdnCacheManagementService } from './cdn-cache-management';
 import { logger } from '../utils/logger';
 import { PodcastEpisode } from '../models/podcast-episode';
-import { RssGenerator } from './rss-generator';
+import { serviceManager } from './service-manager';
 
 /**
  * RSS Feed Cache Service
@@ -56,8 +55,6 @@ export interface RssCacheOptions {
 
 export class RssCacheService {
   private cache: Map<string, RssCacheEntry> = new Map();
-  private cdnCacheService: CdnCacheManagementService;
-  private rssGenerator: RssGenerator;
   private config: RssCacheConfig;
   private stats: RssCacheStats;
   private cleanupIntervalId?: NodeJS.Timeout;
@@ -72,8 +69,7 @@ export class RssCacheService {
       invalidationStrategy: 'immediate'
     };
 
-    this.cdnCacheService = new CdnCacheManagementService();
-    this.rssGenerator = new RssGenerator();
+    // Services will be lazy loaded via ServiceManager
 
     this.stats = {
       totalRequests: 0,
@@ -210,7 +206,8 @@ export class RssCacheService {
           `/feeds/${feedSlug}/episodes`
         ];
 
-        await this.cdnCacheService.invalidateCache({
+        const cdnCacheService = serviceManager.getCdnCacheManagement();
+        await cdnCacheService.invalidateCache({
           contentPaths: cdnPaths,
           domains: [],
           reason: `RSS feed invalidation: ${reason}`
@@ -432,7 +429,8 @@ export class RssCacheService {
       sort_order: options.sortOrder
     };
 
-    return await this.rssGenerator.generateRss(episodes, {}, rssOptions);
+    const rssGenerator = serviceManager.getRssGenerator();
+    return await rssGenerator.generateRss(episodes, {}, rssOptions);
   }
 
   /**

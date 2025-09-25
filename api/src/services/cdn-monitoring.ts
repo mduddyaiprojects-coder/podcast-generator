@@ -1,5 +1,5 @@
 import { logger } from '../utils/logger';
-import { CdnCacheManagementService } from './cdn-cache-management';
+import { serviceManager } from './service-manager';
 
 export interface CacheMetrics {
   timestamp: Date;
@@ -53,7 +53,7 @@ export interface CacheOptimizationRecommendation {
 }
 
 export class CdnMonitoringService {
-  private cacheManagement: CdnCacheManagementService;
+  // cacheManagement will be lazy loaded via ServiceManager
   private alertThresholds: {
     minHitRate: number;
     maxResponseTime: number;
@@ -64,7 +64,7 @@ export class CdnMonitoringService {
   private activeAlerts: CacheAlert[] = [];
 
   constructor() {
-    this.cacheManagement = new CdnCacheManagementService();
+    // cacheManagement will be lazy loaded via ServiceManager
     this.alertThresholds = {
       minHitRate: parseFloat(process.env['CDN_MIN_HIT_RATE'] || '0.7'),
       maxResponseTime: parseInt(process.env['CDN_MAX_RESPONSE_TIME'] || '500'),
@@ -78,8 +78,9 @@ export class CdnMonitoringService {
    */
   async collectMetrics(): Promise<CacheMetrics> {
     try {
-      const statistics = await this.cacheManagement.getCacheStatistics();
-      const analytics = await this.cacheManagement.getCacheAnalytics(
+      const cacheManagement = serviceManager.getCdnCacheManagement();
+      const statistics = await cacheManagement.getCacheStatistics();
+      const analytics = await cacheManagement.getCacheAnalytics(
         new Date(Date.now() - 24 * 60 * 60 * 1000),
         new Date()
       );

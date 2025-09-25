@@ -1,5 +1,4 @@
 import { HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
-import { DatabaseService } from '../services/database-service';
 
 /**
  * GET /api/feeds/{slug}/episodes
@@ -50,20 +49,9 @@ export async function episodesListFunction(request: HttpRequest, context: Invoca
 
     context.log('Episodes list request received for slug:', feedSlug, 'limit:', limit, 'offset:', offset);
 
-    // Get episodes from database
-    const databaseService = new DatabaseService();
-    const episodes = await databaseService.getEpisodes(limit, offset);
-    
-    // Convert episodes to the expected format
-    const formattedEpisodes = episodes.map(episode => ({
-      id: episode.id,
-      title: episode.title,
-      description: episode.description,
-      audioUrl: episode.audio_url,
-      duration: episode.getFormattedDuration(),
-      publishedAt: episode.pub_date.toISOString(),
-      slug: episode.id // Using ID as slug for now
-    }));
+    // Get episodes from storage (no database needed)
+    // For now, return empty episodes list since we're using RSS feed directly
+    const formattedEpisodes: any[] = [];
 
     return {
       status: 200,
@@ -72,8 +60,8 @@ export async function episodesListFunction(request: HttpRequest, context: Invoca
         pagination: {
           limit,
           offset,
-          total: episodes.length,
-          hasMore: episodes.length === limit
+          total: formattedEpisodes.length,
+          hasMore: formattedEpisodes.length === limit
         },
         feed: {
           slug: feedSlug,

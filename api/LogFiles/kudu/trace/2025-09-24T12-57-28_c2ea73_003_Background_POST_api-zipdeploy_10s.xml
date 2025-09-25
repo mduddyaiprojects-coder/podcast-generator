@@ -1,0 +1,39 @@
+<step title="BackgroundTrace" date="2025-09-24T12:57:28.463" instance="c2ea73" url="/api/zipdeploy" method="POST" >
+  <step title="Cleanup Xml Logs" date="2025-09-24T12:57:28.495" /><!-- duration: 31ms -->
+  <step title="Updating shutdown sentinel last write time" date="2025-09-24T12:57:28.604" SemaphoreCount="7" /><!-- duration: 16ms -->
+  <step title="LockFile &apos;C:\home\site\locks\deployments.lock&apos; acquired" date="2025-09-24T12:57:28.651" /><!-- duration: 16ms -->
+  <step title="Creating temporary deployment" date="2025-09-24T12:57:28.682" /><!-- duration: 141ms -->
+  <step title="Performing fetch based deployment" date="2025-09-24T12:57:28.885" >
+    <step title="Fetching changes." date="2025-09-24T12:57:29.120" /><!-- duration: 16ms -->
+    <step title="Starting LocalZipHandler" date="2025-09-24T12:57:29.166" /><!-- duration: 16ms -->
+    <step title="Starting ExtractTriggers" date="2025-09-24T12:57:29.213" /><!-- duration: 16ms -->
+    <step title="Before sending BuildRequestReceived status to /api/updatedeploystatus" date="2025-09-24T12:57:33.557" /><!-- duration: 16ms -->
+    <step title="DeploymentManager.Deploy(id:064cfc99155a42c2afe31a3b620f8dcd)" date="2025-09-24T12:57:33.604" >
+      <step title="Collecting changeset information" date="2025-09-24T12:57:33.651" /><!-- duration: 203ms -->
+      <step title="Updating submodules" date="2025-09-24T12:57:33.916" >
+        <step title="Updating submodules." date="2025-09-24T12:57:34.120" /><!-- duration: 16ms -->
+      </step><!-- duration: 250ms -->
+      <step title="Preparing deployment for commit id &apos;064cfc9915&apos;." date="2025-09-24T12:57:34.385" /><!-- duration: 31ms -->
+      <step title="Determining deployment builder" date="2025-09-24T12:57:34.651" >
+        <step title="Builder is RunFromZipSiteBuilder" date="2025-09-24T12:57:34.682" /><!-- duration: 16ms -->
+      </step><!-- duration: 109ms -->
+      <step title="Copying SSH keys" date="2025-09-24T12:57:34.823" /><!-- duration: 47ms -->
+      <step title="Building" date="2025-09-24T12:57:34.885" >
+        <step title="Skipping build. Project type: Run-From-Zip" date="2025-09-24T12:57:35.104" /><!-- duration: 31ms -->
+        <step title="Skipping post build. Project type: Run-From-Zip" date="2025-09-24T12:57:35.838" /><!-- duration: 31ms -->
+        <step title="Triggering recycle (preview mode disabled)." date="2025-09-24T12:57:36.104" /><!-- duration: 47ms -->
+        <step title="Ignoring FS watcher based recycle request as this is a classic Windows app." date="2025-09-24T12:57:36.166" /><!-- duration: 31ms -->
+        <step title="Deployment successful. DEPLOYMENTINFO: deploymentPath = Functions App ZipDeploy. Run from package., deployer = ms-azuretools-vscode, os = windows, sku = Dynamic, language = node, siteName = podcast-gen-api, slotName = Production, siteHostName = podcast-gen-api.azurewebsites.net, deploymentStatus = Success" date="2025-09-24T12:57:36.635" /><!-- duration: 31ms -->
+        <step title="Purge deployment items" date="2025-09-24T12:57:36.979" >
+          <step title="Remove fd1a86378, Success, received at 9/20/2025 9:03:31 PM" date="2025-09-24T12:57:37.245" /><!-- duration: 16ms -->
+        </step><!-- duration: 313ms -->
+      </step><!-- duration: 2500ms -->
+    </step><!-- duration: 3797ms -->
+    <step title="Cleaning up temp files" date="2025-09-24T12:57:37.416" /><!-- duration: 31ms -->
+    <step title="Updating C:\home\data\SitePackages\packagename.txt with deployment 20250924125716.zip" date="2025-09-24T12:57:37.463" /><!-- duration: 78ms -->
+    <step title="Begin HttpPost https://podcast-gen-api.scm.azurewebsites.net/operations/settriggers, x-ms-request-id: 473cddc0-0779-4671-b07f-93c74131783c" date="2025-09-24T12:57:37.620" /><!-- duration: 16ms -->
+    <step title="End HttpPost, status: OK" date="2025-09-24T12:57:37.963" /><!-- duration: 62ms -->
+    <step title="Scheduling background sync triggers after delay" date="2025-09-24T12:57:38.041" /><!-- duration: 32ms -->
+  </step><!-- duration: 9266ms -->
+  <step title="LockFile &apos;C:\home\site\locks\deployments.lock&apos; released" date="2025-09-24T12:57:38.182" /><!-- duration: 16ms -->
+</step><!-- duration: 9781ms -->

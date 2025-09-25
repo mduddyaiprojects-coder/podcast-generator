@@ -1,5 +1,5 @@
 import { HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
-import { TTSService } from '../services/tts-service';
+import { serviceManager } from '../services/service-manager';
 
 /**
  * POST /api/tts
@@ -53,8 +53,8 @@ export async function ttsGenerationFunction(
       provider 
     });
 
-    // Initialize TTS service
-    const ttsService = new TTSService();
+    // Initialize TTS service (using ServiceManager)
+    const ttsService = serviceManager.getTTS();
 
     // Prepare TTS configuration
     const ttsConfig = {

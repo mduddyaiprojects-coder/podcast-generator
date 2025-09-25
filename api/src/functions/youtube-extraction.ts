@@ -1,5 +1,5 @@
 import { HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
-import { YouTubeService } from '../services/youtube-service';
+import { serviceManager } from '../services/service-manager';
 
 /**
  * POST /api/youtube-extract
@@ -53,8 +53,8 @@ export async function youtubeExtractionFunction(
       content_type 
     });
 
-    // Use YouTube service to get real metadata
-    const youtubeService = new YouTubeService();
+    // Use YouTube service to get real metadata (using ServiceManager)
+    const youtubeService = serviceManager.getYouTube();
     const metadata = await youtubeService.getVideoMetadata(extractedVideoId!);
 
     context.log('YouTube extraction completed:', {

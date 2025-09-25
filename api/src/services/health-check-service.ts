@@ -1,7 +1,4 @@
-import { DatabaseService } from './database-service';
-import { AzureOpenAIService } from './azure-openai-service';
-import { ElevenLabsService } from './elevenlabs-service';
-import { FirecrawlService } from './firecrawl-service';
+import { serviceManager } from './service-manager';
 import { logger } from '../utils/logger';
 
 export interface HealthStatus {
@@ -15,16 +12,8 @@ export interface HealthStatus {
 }
 
 export class HealthCheckService {
-  private databaseService: DatabaseService;
-  private azureOpenAIService: AzureOpenAIService;
-  private elevenLabsService: ElevenLabsService;
-  private firecrawlService: FirecrawlService;
-
   constructor() {
-    this.databaseService = new DatabaseService();
-    this.azureOpenAIService = new AzureOpenAIService();
-    this.elevenLabsService = new ElevenLabsService();
-    this.firecrawlService = new FirecrawlService();
+    // Services will be lazy loaded via ServiceManager
   }
 
   async checkHealth(): Promise<HealthStatus> {
@@ -36,17 +25,17 @@ export class HealthCheckService {
     };
 
     try {
-      // Check database connection
-      services.database = await this.databaseService.checkConnection();
+      // Check Azure OpenAI health (lazy loaded)
+      const azureOpenAI = serviceManager.getAzureOpenAI();
+      services.azureOpenAI = await azureOpenAI.checkHealth();
 
-      // Check Azure OpenAI
-      services.azureOpenAI = await this.azureOpenAIService.checkHealth();
+      // Check ElevenLabs health (lazy loaded)
+      const elevenLabs = serviceManager.getElevenLabs();
+      services.elevenLabs = await elevenLabs.checkHealth();
 
-      // Check ElevenLabs
-      services.elevenLabs = await this.elevenLabsService.checkHealth();
-
-      // Check Firecrawl
-      services.firecrawl = await this.firecrawlService.checkHealth();
+      // Check Firecrawl health (lazy loaded)
+      const firecrawl = serviceManager.getFirecrawl();
+      services.firecrawl = await firecrawl.checkHealth();
 
     } catch (error) {
       logger.error('Health check error:', error);

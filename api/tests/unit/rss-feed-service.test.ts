@@ -4,7 +4,6 @@ import { DatabaseService } from '../../src/services/database-service';
 import { RssGenerator } from '../../src/services/rss-generator';
 
 // Mock dependencies
-jest.mock('../../src/services/database-service');
 jest.mock('../../src/services/rss-generator');
 jest.mock('../../src/utils/logger', () => ({
   logger: {

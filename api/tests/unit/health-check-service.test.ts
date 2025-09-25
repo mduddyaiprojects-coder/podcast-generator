@@ -2,7 +2,6 @@ import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { HealthCheckService } from '../../src/services/health-check-service';
 
 // Mock dependencies
-jest.mock('../../src/services/database-service');
 jest.mock('../../src/services/azure-openai-service');
 jest.mock('../../src/services/elevenlabs-service');
 jest.mock('../../src/services/firecrawl-service');

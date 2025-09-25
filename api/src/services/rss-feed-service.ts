@@ -1,24 +1,30 @@
 // import { PodcastEpisode } from '../models/podcast-episode';
-import { DatabaseService } from './database-service';
-import { RssGenerator } from './rss-generator';
+import { serviceManager } from './service-manager';
 import { logger } from '../utils/logger';
 
 export class RssFeedService {
-  private databaseService: DatabaseService;
-  private rssGenerator: RssGenerator;
 
   constructor() {
-    this.databaseService = new DatabaseService();
-    this.rssGenerator = new RssGenerator();
+    // Services will be lazy loaded via ServiceManager
   }
 
   async generateRssFeed(_feedId?: string): Promise<string> {
     try {
-      // Get episodes from database (limit to 50 episodes for RSS feed)
-      const episodes = await this.databaseService.getEpisodes(50, 0);
-
-      // Generate RSS XML
-      const rssContent = await this.rssGenerator.generateRss(episodes);
+      // Generate RSS XML directly from storage (no database needed) - using ServiceManager
+      const rssGenerator = serviceManager.getRssGenerator();
+      const rssContent = await rssGenerator.generateRssFromStorage({
+        title: 'AI Podcast Generator',
+        description: 'AI-generated podcast episodes from web content, YouTube videos, and documents',
+        link: 'https://podcast-gen-api.azurewebsites.net',
+        language: 'en-us',
+        author: 'AI Podcast Generator',
+        email: 'admin@podcast-gen-api.azurewebsites.net',
+        category: 'Technology',
+        explicit: false
+      }, {
+        max_episodes: 50,
+        sort_order: 'newest'
+      });
 
       return rssContent;
 

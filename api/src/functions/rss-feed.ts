@@ -1,6 +1,5 @@
 import { HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
-import { DatabaseService } from '../services/database-service';
-import { RssGenerator } from '../services/rss-generator';
+import { serviceManager } from '../services/service-manager';
 import { logger } from '../utils/logger';
 
 /**
@@ -32,33 +31,20 @@ export async function rssFeedFunction(request: HttpRequest, _context: Invocation
     // Parse query parameters for cache options
     const options = parseRssOptions(request);
     
-    // Initialize services
-    const databaseService = new DatabaseService();
-
-    // Get episodes from database
-    const episodes = await databaseService.getEpisodes(
-      options.maxEpisodes || 100,
-      0
-    );
-
-    // Get global feed metadata from database
-    const globalFeedResult = await databaseService['executeQuery'](async (client) => {
-      return await client.query('SELECT * FROM global_feed WHERE id = $1', ['00000000-0000-0000-0000-000000000000']);
-    });
-    const globalFeed = globalFeedResult.rows[0];
-
-    // Generate RSS feed with database metadata
-    const rssGenerator = new RssGenerator();
-    const rssContent = await rssGenerator.generateRss(episodes, {
-      title: globalFeed?.title || 'AI Podcast Generator',
-      description: globalFeed?.description || 'AI-generated podcast episodes from web content, YouTube videos, and documents',
+    // Generate RSS feed directly from blob storage (no database required)
+    const rssGenerator = serviceManager.getRssGenerator();
+    const rssContent = await rssGenerator.generateRssFromStorage({
+      title: 'AI Podcast Generator',
+      description: 'AI-generated podcast episodes from web content, YouTube videos, and documents',
       link: 'https://podcast-gen-api.azurewebsites.net',
       language: 'en-us',
-      author: globalFeed?.author || 'AI Podcast Generator',
-      email: globalFeed?.admin_email || 'admin@podcast-gen-api.azurewebsites.net',
-      category: globalFeed?.category || 'Technology',
-      explicit: false,
-      artwork_url: globalFeed?.artwork_url || undefined
+      author: 'AI Podcast Generator',
+      email: 'admin@podcast-gen-api.azurewebsites.net',
+      category: 'Technology',
+      explicit: false
+    }, {
+      max_episodes: options.maxEpisodes || 100,
+      sort_order: 'newest'
     });
     
     const rssResult = {
@@ -80,7 +66,6 @@ export async function rssFeedFunction(request: HttpRequest, _context: Invocation
 
     logger.info('RSS feed generated successfully', {
       feedSlug,
-      episodeCount: episodes.length,
       fromCache: rssResult.fromCache,
       responseTime: rssResult.responseTime,
       contentLength: rssResult.content.length

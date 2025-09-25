@@ -1,33 +1,23 @@
 import { ExtractedContent } from './content-processor';
 import { PodcastEpisode } from '../models/podcast-episode';
-import { AzureOpenAIService } from './azure-openai-service';
-import { TTSService } from './tts-service';
-import { StorageService } from './storage-service';
+import { serviceManager } from './service-manager';
 import { logger } from '../utils/logger';
 import { v4 as uuidv4 } from 'uuid';
 
 export class PodcastGenerator {
-  private azureOpenAIService: AzureOpenAIService;
-  private ttsService: TTSService;
-  private storageService: StorageService;
-
   constructor() {
-    this.azureOpenAIService = new AzureOpenAIService();
-    this.ttsService = new TTSService();
-    this.storageService = new StorageService({
-      connectionString: process.env['AZURE_STORAGE_CONNECTION_STRING'] || '',
-      containerName: process.env['AZURE_STORAGE_CONTAINER_NAME'] || 'podcast-content',
-      cdnBaseUrl: process.env['AZURE_CDN_BASE_URL']
-    });
+    // Services will be lazy loaded via ServiceManager
   }
 
   async generateEpisode(content: ExtractedContent, submissionId: string): Promise<PodcastEpisode> {
     try {
-      // Generate podcast script using Azure OpenAI
-      const script = await this.azureOpenAIService.generatePodcastScript(content);
+      // Generate podcast script using Azure OpenAI (lazy loaded)
+      const azureOpenAI = serviceManager.getAzureOpenAI();
+      const script = await azureOpenAI.generatePodcastScript(content);
 
-      // Generate audio using TTS service (Azure Speech with ElevenLabs fallback)
-      const ttsResult = await this.ttsService.generateAudioWithFallback(
+      // Generate audio using TTS service (lazy loaded)
+      const tts = serviceManager.getTTS();
+      const ttsResult = await tts.generateAudioWithFallback(
         script,
         'azure', // Use Azure Speech as primary
         {
@@ -37,8 +27,9 @@ export class PodcastGenerator {
       );
       const audioBuffer = ttsResult.audio_buffer;
 
-      // Upload audio to storage
-      const audioResult = await this.storageService.uploadAudio(audioBuffer, submissionId);
+      // Upload audio to storage (lazy loaded)
+      const storage = serviceManager.getStorage();
+      const audioResult = await storage.uploadAudio(audioBuffer, submissionId);
 
       // Use actual audio duration from TTS service
       const actualDuration = ttsResult.duration_seconds;
