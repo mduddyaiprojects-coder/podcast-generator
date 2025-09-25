@@ -172,9 +172,9 @@
 - [x] T089 End-to-end testing with real content
 - [ ] T089B Fix E2E test data issues to achieve 100% pass rate
 - [ ] T090 Production deployment and monitoring setup
+- [x] T098 Update Podcast Title and Artwork
 
 ## 3.11 E2E Resolution Phase
-
 - [x] T091 E2E Resolution Phase - Voice Name Mapping Issues (ROOT CAUSE)
 - [x] T092 E2E Resolution Phase - Chapter Marker Duration Issues (ROOT CAUSE)
 - [x] T093 E2E Resolution Phase - Test Timeout Issues (ROOT CAUSE)
