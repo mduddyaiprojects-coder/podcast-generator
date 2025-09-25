@@ -1,0 +1,28 @@
+# Cursor Rules for Podcast Generator Project
+
+## Deployment Rules
+- NEVER run deployment commands automatically
+- NEVER run `func azure functionapp publish` or similar deployment commands
+- NEVER run `npm run deploy` or similar deployment scripts
+- ALWAYS ask user to deploy manually
+- User handles ALL deployments - never assume deployment is needed
+
+## Code Changes
+- Always build and test code before suggesting deployment
+- Fix compilation errors before suggesting deployment
+- Provide clear instructions for what needs to be deployed
+
+## Azure Function App
+- Never restart or modify Function App settings without explicit permission
+- Never set environment variables without explicit permission
+- Always explain what changes need to be made before making them
+
+## Testing
+- Run tests locally before suggesting deployment
+- Fix test failures before suggesting deployment
+- Provide test results and explain any failures
+
+## Memory and Performance
+- Monitor memory usage and explain any issues
+- Suggest optimizations but don't implement without permission
+- Explain the impact of changes before making them
