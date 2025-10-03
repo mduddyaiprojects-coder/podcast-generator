@@ -1,11 +1,14 @@
 import { PodcastEpisode } from '../models/podcast-episode';
 import { logger } from '../utils/logger';
+import { getCurrentBranding } from '../functions/branding-put';
 
 /**
  * RSSGenerator Service
  * 
  * Handles RSS feed generation for the single public podcast feed.
  * Generates iTunes-compliant RSS XML with proper metadata and episode information.
+ * 
+ * Integrates with branding updates from T016 (FR-003).
  */
 
 export interface FeedMetadata {
@@ -30,19 +33,41 @@ export interface RSSGenerationOptions {
 }
 
 export class RssGenerator {
-  private defaultMetadata: FeedMetadata;
+  private baseMetadata: Omit<FeedMetadata, 'title' | 'artwork_url'>;
 
   constructor() {
-    this.defaultMetadata = {
-      title: 'AI Podcast Generator',
+    // Store base metadata (non-branding fields)
+    // Title and artwork will be fetched fresh on each generation (FR-003)
+    this.baseMetadata = {
       description: 'AI-generated podcast episodes from web content, YouTube videos, and documents',
       link: 'https://podcast-gen-api.azurewebsites.net',
       language: 'en-us',
       author: 'AI Podcast Generator',
       email: 'admin@podcast-gen-api.azurewebsites.net',
       category: 'Technology',
-      explicit: false,
-      artwork_url: undefined
+      explicit: false
+    };
+    
+    logger.debug('RssGenerator initialized');
+  }
+
+  /**
+   * Get current feed metadata with latest branding
+   * Fetches branding fresh on each call to ensure RSS reflects latest updates (FR-003)
+   */
+  private async getCurrentMetadata(): Promise<FeedMetadata> {
+    const branding = await getCurrentBranding();
+    
+    logger.info('RssGenerator: Fetching current branding for RSS feed', {
+      title: branding.title,
+      imageUrl: branding.imageUrl,
+      updatedAt: branding.updatedAt
+    });
+    
+    return {
+      ...this.baseMetadata,
+      title: branding.title,
+      artwork_url: branding.imageUrl
     };
   }
 
@@ -94,8 +119,8 @@ export class RssGenerator {
       return await this.generateRss(episodes, metadata, options);
     } catch (error) {
       logger.error('Failed to generate RSS from storage:', error);
-      // Return empty RSS feed if storage fails
-      return this.generateEmptyRss(metadata);
+      // Re-throw the error so it's visible instead of returning empty feed
+      throw new Error(`RSS generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -108,7 +133,17 @@ export class RssGenerator {
     options: RSSGenerationOptions = {}
   ): Promise<string> {
     try {
-      const mergedMetadata = { ...this.defaultMetadata, ...metadata };
+      // Get current metadata with latest branding (FR-003)
+      const currentMetadata = await this.getCurrentMetadata();
+      const mergedMetadata = { ...currentMetadata, ...metadata };
+      
+      logger.info('RssGenerator: Generating RSS with metadata', {
+        currentTitle: currentMetadata.title,
+        passedTitle: metadata.title,
+        mergedTitle: mergedMetadata.title,
+        passedMetadataKeys: Object.keys(metadata)
+      });
+      
       const mergedOptions = {
         include_chapters: true,
         include_transcript: false,
@@ -444,8 +479,10 @@ export class RssGenerator {
   /**
    * Generate empty RSS feed when no episodes are available
    */
-  private generateEmptyRss(metadata: Partial<FeedMetadata>): string {
-    const mergedMetadata = { ...this.defaultMetadata, ...metadata };
+  private async generateEmptyRss(metadata: Partial<FeedMetadata>): Promise<string> {
+    // Get current metadata with latest branding (FR-003)
+    const currentMetadata = await this.getCurrentMetadata();
+    const mergedMetadata = { ...currentMetadata, ...metadata };
     const now = new Date().toUTCString();
     
     return `<?xml version="1.0" encoding="UTF-8"?>
@@ -471,6 +508,8 @@ export class RssGenerator {
     </itunes:owner>
     <itunes:category text="${mergedMetadata.category}"/>
     <itunes:explicit>${mergedMetadata.explicit ? 'yes' : 'no'}</itunes:explicit>
+    <itunes:type>episodic</itunes:type>
+    ${mergedMetadata.artwork_url ? `<itunes:image href="${this.escapeXml(mergedMetadata.artwork_url)}"/>` : ''}
     
     <!-- No episodes available -->
   </channel>

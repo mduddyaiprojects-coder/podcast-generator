@@ -1,5 +1,0 @@
-<step title="BackgroundTrace" date="2025-09-24T19:34:57.281" instance="16ed5e" url="synctriggers-operation" method="POST" >
-  <step title="Cleanup Xml Logs" date="2025-09-24T19:34:57.296" /><!-- duration: 47ms -->
-  <step title="Updating shutdown sentinel last write time" date="2025-09-24T19:34:57.359" SemaphoreCount="6" /><!-- duration: 31ms -->
-  <step title="Delaying &apos;00:01:00&apos; for Functions site to restart." date="2025-09-24T19:34:57.406" /><!-- duration: 15ms -->
-</step><!-- duration: 67635ms -->

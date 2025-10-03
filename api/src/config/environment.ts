@@ -47,11 +47,6 @@ export interface EnvironmentConfig {
       enableHttps: boolean;
     };
   };
-  database: {
-    url?: string;
-    maxConnections: number;
-    connectionTimeout: number;
-  };
   security: {
     enableApiKeyValidation: boolean;
     enableCredentialRotation: boolean;
@@ -132,12 +127,6 @@ export class EnvironmentService {
           enableCompression: this.getBooleanEnv('CDN_ENABLE_COMPRESSION', true),
           enableHttps: this.getBooleanEnv('CDN_ENABLE_HTTPS', true)
         }
-      },
-      
-      database: {
-        url: process.env['DATABASE_URL'],
-        maxConnections: this.getNumberEnv('DATABASE_MAX_CONNECTIONS', 10),
-        connectionTimeout: this.getNumberEnv('DATABASE_CONNECTION_TIMEOUT', 30000)
       },
       
       security: {
@@ -262,13 +251,6 @@ export class EnvironmentService {
    */
   getStorageConfig() {
     return { ...this.config.storage };
-  }
-
-  /**
-   * Get database configuration
-   */
-  getDatabaseConfig() {
-    return { ...this.config.database };
   }
 
   /**

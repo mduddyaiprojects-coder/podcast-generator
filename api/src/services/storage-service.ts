@@ -81,7 +81,7 @@ export class StorageService {
         }
       };
 
-      const uploadResponse: BlobUploadCommonResponse = await blockBlobClient.upload(
+      const uploadResponse = await blockBlobClient.upload(
         audioBuffer,
         audioBuffer.length,
         uploadOptions
@@ -129,7 +129,7 @@ export class StorageService {
         }
       };
 
-      const uploadResponse: BlobUploadCommonResponse = await blockBlobClient.upload(
+      const uploadResponse = await blockBlobClient.upload(
         buffer,
         buffer.length,
         uploadOptions
@@ -177,7 +177,7 @@ export class StorageService {
         }
       };
 
-      const uploadResponse: BlobUploadCommonResponse = await blockBlobClient.upload(
+      const uploadResponse = await blockBlobClient.upload(
         buffer,
         buffer.length,
         uploadOptions
@@ -225,7 +225,7 @@ export class StorageService {
         }
       };
 
-      const uploadResponse: BlobUploadCommonResponse = await blockBlobClient.upload(
+      const uploadResponse = await blockBlobClient.upload(
         buffer,
         buffer.length,
         uploadOptions
@@ -274,7 +274,7 @@ export class StorageService {
         }
       };
 
-      const uploadResponse: BlobUploadCommonResponse = await blockBlobClient.upload(
+      const uploadResponse = await blockBlobClient.upload(
         buffer,
         buffer.length,
         uploadOptions
@@ -320,15 +320,8 @@ export class StorageService {
 
       await Promise.all(deletePromises);
       
-      // Purge CDN cache for deleted files
-      if (cdnService.checkHealth()) {
-        try {
-          await cdnService.purgeSubmissionContent(submissionId);
-          logger.info(`CDN cache purged for submission: ${submissionId}`);
-        } catch (error) {
-          logger.warn('Failed to purge CDN cache for deleted files', { error, submissionId });
-        }
-      }
+      // CDN cache purging removed - cdnService not available
+      logger.info(`Deleted ${deletePromises.length} files for submission: ${submissionId}`);
       
       logger.info(`Deleted files for submission: ${submissionId}`, {
         submissionId,

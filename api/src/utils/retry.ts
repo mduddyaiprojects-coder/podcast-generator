@@ -174,7 +174,7 @@ export class RetryUtil {
   /**
    * Create retry configuration for specific service types
    */
-  static createServiceConfig(serviceType: 'api' | 'database' | 'storage' | 'ai'): RetryConfig {
+  static createServiceConfig(serviceType: 'api' | 'storage' | 'ai'): RetryConfig {
     const baseConfig = { ...DEFAULT_RETRY_CONFIG };
 
     switch (serviceType) {
@@ -186,17 +186,6 @@ export class RetryUtil {
           maxDelayMs: 5000,
           retryCondition: (error) => {
             return error.status >= 500 || error.status === 429 || error.code === 'ECONNRESET';
-          }
-        };
-      
-      case 'database':
-        return {
-          ...baseConfig,
-          maxAttempts: 5,
-          baseDelayMs: 500,
-          maxDelayMs: 3000,
-          retryCondition: (error) => {
-            return error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT' || error.message?.includes('connection');
           }
         };
       

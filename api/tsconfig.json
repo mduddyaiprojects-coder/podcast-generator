@@ -44,6 +44,6 @@
     "src/functions/performance-testing.ts",
     "src/services/cdn-*.ts",
     "src/services/performance-monitoring.ts",
-    "src/services/storage-*.ts"
+    "src/services/storage-lifecycle.ts"
   ]
 }

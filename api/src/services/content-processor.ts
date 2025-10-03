@@ -62,24 +62,48 @@ export class ContentProcessor {
     };
   }
 
-  private async extractFromYouTube(_youtubeUrl: string): Promise<ExtractedContent> {
-    // TODO: Implement YouTube content extraction
-    // This would involve using YouTube API or a service like Firecrawl
-    throw new Error('YouTube extraction not yet implemented');
-  }
-
-  private async extractFromDocument(document: any): Promise<ExtractedContent> {
-    // Process document content (lazy loaded)
+  private async extractFromYouTube(youtubeUrl: string): Promise<ExtractedContent> {
+    // Use Firecrawl to extract content from YouTube URL (supports YouTube)
+    const firecrawl = serviceManager.getFirecrawl();
+    const extracted = await firecrawl.extractContent(youtubeUrl);
+    
+    // Use Azure OpenAI to generate summary
     const azureOpenAI = serviceManager.getAzureOpenAI();
-    const summary = await azureOpenAI.generateSummary(document.content);
+    const summary = await azureOpenAI.generateSummary(extracted.content);
 
     return {
-      title: document.title,
-      content: document.content,
+      title: extracted.title || 'YouTube Video',
+      content: extracted.content,
       summary,
       metadata: {
-        originalTitle: document.title,
-        wordCount: document.content.split(' ').length
+        originalUrl: youtubeUrl,
+        originalTitle: extracted.title,
+        author: extracted.author,
+        publishedDate: extracted.publishedDate,
+        wordCount: extracted.content.split(' ').length
+      }
+    };
+  }
+
+  private async extractFromDocument(documentUrl: string): Promise<ExtractedContent> {
+    // Use Firecrawl to extract content from document URL (supports PDFs and docs)
+    const firecrawl = serviceManager.getFirecrawl();
+    const extracted = await firecrawl.extractContent(documentUrl);
+    
+    // Use Azure OpenAI to generate summary
+    const azureOpenAI = serviceManager.getAzureOpenAI();
+    const summary = await azureOpenAI.generateSummary(extracted.content);
+
+    return {
+      title: extracted.title || 'Document',
+      content: extracted.content,
+      summary,
+      metadata: {
+        originalUrl: documentUrl,
+        originalTitle: extracted.title,
+        author: extracted.author,
+        publishedDate: extracted.publishedDate,
+        wordCount: extracted.content.split(' ').length
       }
     };
   }

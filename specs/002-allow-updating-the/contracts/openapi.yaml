@@ -1,0 +1,90 @@
+openapi: 3.0.3
+info:
+  title: Podcast Generator - Branding & Health APIs
+  version: 0.1.0
+paths:
+  /branding:
+    put:
+      summary: Update podcast branding (title/image)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                imageUrl:
+                  type: string
+              required: []
+      responses:
+        '200':
+          description: Branding updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  imageUrl:
+                    type: string
+                  updatedAt:
+                    type: string
+                    format: date-time
+  /health/youtube:
+    get:
+      summary: Health check - YouTube processing
+      responses:
+        '200':
+          description: Health status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [OK, DEGRADED, FAILED]
+                  message:
+                    type: string
+                  lastSuccessAt:
+                    type: string
+                    format: date-time
+  /health/doc-ingest:
+    get:
+      summary: Health check - Document ingestion
+      responses:
+        '200':
+          description: Health status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [OK, DEGRADED, FAILED]
+                  message:
+                    type: string
+                  lastSuccessAt:
+                    type: string
+                    format: date-time
+  /heartbeat:
+    get:
+      summary: Server heartbeat
+      responses:
+        '200':
+          description: Heartbeat status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [OK, DEGRADED, FAILED]
+                  timestamp:
+                    type: string
+                    format: date-time

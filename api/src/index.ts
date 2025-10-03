@@ -13,6 +13,12 @@ import { ttsGenerationFunction } from './functions/tts-generation';
 import { youtubeExtractionFunction } from './functions/youtube-extraction';
 import { webhookShareFunction } from './functions/webhook-share';
 import { testStorageFunction } from './functions/test-storage';
+// Feature 002 endpoints
+import { heartbeatFunction } from './functions/heartbeat';
+import { healthYoutubeFunction } from './functions/health-youtube';
+import { healthDocIngestFunction } from './functions/health-doc-ingest';
+import { brandingPutFunction } from './functions/branding-put';
+import { brandingGetFunction } from './functions/branding-get';
 // import { dataRetentionCleanupTimer, dataRetentionHttp } from './functions/data-retention-cleanup';
 // import { databaseMonitoringFunction } from './functions/database-monitoring';
 // Security endpoints removed - not needed for personal use
@@ -33,6 +39,46 @@ app.http('health-check', {
     authLevel: 'anonymous',
     route: 'health',
     handler: healthCheckFunction
+});
+
+// Feature 002: Heartbeat endpoint (T002)
+app.http('heartbeat', {
+    methods: ['GET'],
+    authLevel: 'anonymous',
+    route: 'heartbeat',
+    handler: heartbeatFunction
+});
+
+// Feature 002: YouTube health check endpoint (T002)
+app.http('health-youtube', {
+    methods: ['GET'],
+    authLevel: 'anonymous',
+    route: 'health/youtube',
+    handler: healthYoutubeFunction
+});
+
+// Feature 002: Document ingestion health check endpoint (T002)
+app.http('health-doc-ingest', {
+    methods: ['GET'],
+    authLevel: 'anonymous',
+    route: 'health/doc-ingest',
+    handler: healthDocIngestFunction
+});
+
+// Feature 002: Branding update endpoint (T002)
+app.http('branding-put', {
+    methods: ['PUT'],
+    authLevel: 'anonymous',
+    route: 'branding',
+    handler: brandingPutFunction
+});
+
+// Feature 002: Branding get endpoint
+app.http('branding-get', {
+    methods: ['GET'],
+    authLevel: 'anonymous',
+    route: 'branding',
+    handler: brandingGetFunction
 });
 
 // Content submission endpoint (T025)

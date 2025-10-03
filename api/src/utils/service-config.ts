@@ -2,16 +2,6 @@
  * Common service configuration utilities
  */
 
-export interface DatabaseConfig {
-  url?: string;
-  host?: string;
-  port?: number;
-  database?: string;
-  user?: string;
-  password?: string;
-  ssl?: boolean;
-}
-
 export interface AzureConfig {
   subscriptionId?: string;
   resourceGroupName?: string;
@@ -34,29 +24,6 @@ export interface CdnConfig {
   endpointName?: string;
   originHostName?: string;
   originPath?: string;
-}
-
-/**
- * Get database configuration from environment variables
- */
-export function getDatabaseConfig(): DatabaseConfig {
-  const databaseUrl = process.env['DATABASE_URL'];
-  
-  if (databaseUrl) {
-    return {
-      url: databaseUrl,
-      ssl: true
-    };
-  }
-
-  return {
-    host: process.env['DATABASE_HOST'] || 'localhost',
-    port: parseInt(process.env['DATABASE_PORT'] || '5432'),
-    database: process.env['DATABASE_NAME'] || 'podcast_generator_dev',
-    user: process.env['DATABASE_USER'] || 'postgres',
-    password: process.env['DATABASE_PASSWORD'] || 'password',
-    ssl: process.env['NODE_ENV'] === 'production'
-  };
 }
 
 /**

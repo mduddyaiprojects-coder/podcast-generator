@@ -90,6 +90,23 @@ The `local.settings.json` file contains environment variables for local developm
 | `AZURE_STORAGE_CONNECTION_STRING` | Azure Storage connection | No (for file storage) |
 | `DATABASE_URL` | PostgreSQL connection string | No (for database) |
 | `CDN_BASE_URL` | CDN base URL | No (for file serving) |
+| `HEALTH_CHECK_YOUTUBE_ENABLED` | Enable YouTube health checks | No (default: `true`) |
+| `HEALTH_CHECK_DOC_INGEST_ENABLED` | Enable document ingestion health checks | No (default: `true`) |
+| `HEARTBEAT_ENABLED` | Enable server heartbeat | No (default: `true`) |
+
+### Advanced Health Check Configuration (Optional)
+
+These settings control health check behavior and are optional. Defaults are suitable for most cases.
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `HEALTH_CHECK_YOUTUBE_INTERVAL_MS` | YouTube health check interval | `60000` (1 min) |
+| `HEALTH_CHECK_YOUTUBE_TIMEOUT_MS` | YouTube health check timeout | `5000` (5 sec) |
+| `HEALTH_CHECK_YOUTUBE_RETRY_ATTEMPTS` | YouTube health check retry attempts | `2` |
+| `HEALTH_CHECK_DOC_INGEST_INTERVAL_MS` | Doc ingestion health check interval | `60000` (1 min) |
+| `HEALTH_CHECK_DOC_INGEST_TIMEOUT_MS` | Doc ingestion health check timeout | `5000` (5 sec) |
+| `HEALTH_CHECK_DOC_INGEST_RETRY_ATTEMPTS` | Doc ingestion health check retry attempts | `2` |
+| `HEARTBEAT_INTERVAL_MS` | Heartbeat check interval | `30000` (30 sec) |
 
 ## Development Workflow
 

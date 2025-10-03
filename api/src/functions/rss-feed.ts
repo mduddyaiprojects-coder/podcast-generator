@@ -32,9 +32,9 @@ export async function rssFeedFunction(request: HttpRequest, _context: Invocation
     const options = parseRssOptions(request);
     
     // Generate RSS feed directly from blob storage (no database required)
+    // Don't pass title/artwork_url - let RssGenerator use current branding (FR-003)
     const rssGenerator = serviceManager.getRssGenerator();
     const rssContent = await rssGenerator.generateRssFromStorage({
-      title: 'AI Podcast Generator',
       description: 'AI-generated podcast episodes from web content, YouTube videos, and documents',
       link: 'https://podcast-gen-api.azurewebsites.net',
       language: 'en-us',
@@ -80,8 +80,12 @@ export async function rssFeedFunction(request: HttpRequest, _context: Invocation
   } catch (error) {
     const responseTime = Date.now() - startTime;
     
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    
     logger.error('RSS feed generation failed', {
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: errorMessage,
+      stack: errorStack,
       responseTime,
       feedSlug: request.params['slug']
     });
@@ -95,7 +99,8 @@ export async function rssFeedFunction(request: HttpRequest, _context: Invocation
       jsonBody: {
         error: 'INTERNAL_ERROR',
         message: 'Failed to generate RSS feed',
-        details: 'Please try again later'
+        details: errorMessage, // Show actual error for debugging
+        stack: errorStack?.split('\n').slice(0, 3).join('\n') // First 3 lines of stack
       }
     };
   }

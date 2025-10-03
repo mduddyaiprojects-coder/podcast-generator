@@ -91,7 +91,7 @@ As a user who consumes content on my mobile device, I want to easily convert any
 - **FR-009**: System MUST handle processing failures gracefully with user notification
 - **FR-010**: System MUST support multiple episodes per user feed
 - **FR-011**: System MUST preserve original content source information in episode metadata
-- **FR-012**: System MUST generate episodes in standard audio format compatible with podcast players
+- **FR-012**: System MUST generate episodes in MP3 format at 128 kbps quality, compatible with podcast players
 - **FR-013**: System MUST provide processing status updates to users
 - **FR-014**: System MUST handle content that exceeds 1 hour for videos, 50 pages for documents, or 50,000 words for articles
 - **FR-015**: System MUST support anonymous access without requiring user registration
@@ -108,6 +108,12 @@ As a user who consumes content on my mobile device, I want to easily convert any
 - **Processing Job**: Represents the background task that converts submitted content into a podcast episode, including current status, error information, and processing timestamps
 
 ---
+
+## Clarifications
+*Questions and answers from specification review*
+
+### Session 2025-09-29
+- Q: What audio quality should the generated podcast episodes have? → A: Standard quality (128 kbps, good voice clarity)
 
 ## Review & Acceptance Checklist
 *GATE: Automated checks run during main() execution*

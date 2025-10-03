@@ -1,0 +1,23 @@
+# Quickstart: Validate Feature 002
+
+Use this checklist to validate end-to-end:
+
+1) Branding update
+- Update title and/or upload valid image (square; 1400–3000 px; JPEG/PNG; RGB)
+- Confirm RSS feed reflects changes
+- Within 24h, confirm podcast app shows updated title/image
+- Confirm future YouTube videos use updated metadata/thumbnail defaults (per‑video scope)
+
+2) Health checks
+- GET /health/youtube → status, message, lastSuccessAt present
+- GET /health/doc-ingest → status, message, lastSuccessAt present
+- GET /heartbeat → status + timestamp present
+
+3) iOS Shortcut E2E (dry-run)
+- Run the Shortcut’s dry‑run validation flow on device
+- Confirm local validation OK and heartbeat shows OK
+
+4) Script & Voice
+- Generate an episode → verify structure, 12–20 min target, tone “Energetic, conversational, and warm”
+- Select a voice style → preview plays
+- Force preferred voice unavailable → fallback applied and communicated

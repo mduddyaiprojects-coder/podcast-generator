@@ -14,7 +14,10 @@
     "FIRECRAWL_API_KEY": "your-firecrawl-api-key",
     "AZURE_STORAGE_CONNECTION_STRING": "your-azure-storage-connection-string",
     "DATABASE_URL": "your-postgresql-connection-string",
-    "CDN_BASE_URL": "your-cdn-base-url"
+    "CDN_BASE_URL": "your-cdn-base-url",
+    "HEALTH_CHECK_YOUTUBE_ENABLED": "true",
+    "HEALTH_CHECK_DOC_INGEST_ENABLED": "true",
+    "HEARTBEAT_ENABLED": "true"
   },
   "Host": {
     "LocalHttpPort": 7071,

@@ -1,10 +1,15 @@
 import { HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
-import { serviceManager } from '../services/service-manager';
+import { ingestYouTubeVideo } from '../integrations/youtube';
+import { logger } from '../utils/logger';
 
 /**
  * POST /api/youtube-extract
  *
- * Extracts video metadata from YouTube URLs using YouTube Data API.
+ * Ingests YouTube videos as content source for podcast generation.
+ * Extracts metadata, transcript, and audio information.
+ * 
+ * Requirements:
+ * - FR-004: YouTube Ingestion as Source
  */
 export async function youtubeExtractionFunction(
   request: HttpRequest,
@@ -17,9 +22,17 @@ export async function youtubeExtractionFunction(
       youtube_url?: string; 
       video_id?: string;
       content_type?: string;
+      include_transcript?: boolean;
+      include_audio?: boolean;
     };
     
-    const { youtube_url, video_id, content_type } = body;
+    const { 
+      youtube_url, 
+      video_id, 
+      content_type,
+      include_transcript = true,
+      include_audio = false 
+    } = body;
 
     // Basic validation
     if (!youtube_url && !video_id) {
@@ -32,64 +45,73 @@ export async function youtubeExtractionFunction(
       };
     }
 
-    // Extract video ID if not provided
-    let extractedVideoId = video_id;
-    if (!extractedVideoId && youtube_url) {
-      extractedVideoId = extractVideoIdFromUrl(youtube_url);
-      if (!extractedVideoId) {
-        return {
-          status: 400,
-          jsonBody: {
-            error: 'INVALID_YOUTUBE_URL',
-            message: 'Invalid YouTube URL format'
-          }
-        };
-      }
-    }
+    // Use video URL or construct from ID
+    const videoUrl = youtube_url || `https://www.youtube.com/watch?v=${video_id}`;
 
-    context.log('Extracting YouTube metadata:', { 
-      video_id: extractedVideoId, 
-      youtube_url, 
-      content_type 
+    context.log('Ingesting YouTube content:', { 
+      videoUrl, 
+      content_type,
+      include_transcript,
+      include_audio
     });
 
-    // Use YouTube service to get real metadata (using ServiceManager)
-    const youtubeService = serviceManager.getYouTube();
-    const metadata = await youtubeService.getVideoMetadata(extractedVideoId!);
+    // Use YouTube integration layer (FR-004)
+    const result = await ingestYouTubeVideo(videoUrl, {
+      includeTranscript: include_transcript,
+      includeAudio: include_audio,
+      audioQuality: 'high'
+    });
+
+    logger.info('YouTube ingestion completed', {
+      videoId: result.videoId,
+      title: result.title.substring(0, 50),
+      hasTranscript: !!result.transcript,
+      hasAudioUrl: !!result.audioUrl
+    });
 
     context.log('YouTube extraction completed:', {
-      video_id: extractedVideoId,
-      title: metadata.title,
-      duration: metadata.duration,
-      view_count: metadata.viewCount
+      video_id: result.videoId,
+      title: result.title,
+      duration: result.duration,
+      has_transcript: !!result.transcript,
+      has_audio: !!result.audioUrl
     });
 
     return {
       status: 200,
       jsonBody: {
         success: true,
-        message: 'YouTube metadata extracted successfully',
-        video_id: extractedVideoId,
-        youtube_url: youtube_url,
-        title: metadata.title,
-        description: metadata.description,
-        channel_title: metadata.channelTitle,
-        channel_id: metadata.channelId,
-        published_at: metadata.publishedAt,
-        duration: metadata.duration,
-        view_count: metadata.viewCount,
-        like_count: metadata.likeCount,
-        comment_count: metadata.commentCount,
-        thumbnail_url: metadata.thumbnailUrl,
-        tags: metadata.tags,
-        category_id: metadata.categoryId,
+        message: 'YouTube content ingested successfully',
+        video_id: result.videoId,
+        youtube_url: videoUrl,
+        title: result.title,
+        description: result.description,
+        channel_title: result.channelTitle,
+        published_at: result.publishedAt,
+        duration: result.duration,
+        view_count: result.metadata.viewCount,
+        like_count: result.metadata.likeCount,
+        thumbnail_url: result.thumbnailUrl,
+        tags: result.metadata.tags,
         content_type: content_type || 'youtube_video',
-        extracted_at: new Date().toISOString()
+        
+        // Ingestion results (FR-004)
+        transcript: result.transcript,
+        transcript_length: result.transcript?.length,
+        audio_url: result.audioUrl,
+        audio_format: result.audioFormat,
+        
+        extracted_at: result.extractedAt.toISOString(),
+        extraction_method: result.extractionMethod
       }
     };
 
   } catch (error) {
     context.error('YouTube extraction error:', error);
+    logger.error('YouTube extraction failed', {
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+    
     return {
       status: 500,
       jsonBody: {
@@ -99,13 +121,4 @@ export async function youtubeExtractionFunction(
       }
     };
   }
-}
-
-/**
- * Extract video ID from YouTube URL
- */
-function extractVideoIdFromUrl(url: string): string | undefined {
-  const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
-  const match = url.match(youtubeRegex);
-  return match ? match[1] : undefined;
 }
